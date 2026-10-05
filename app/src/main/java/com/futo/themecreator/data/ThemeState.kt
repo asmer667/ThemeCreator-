@@ -151,4 +151,33 @@ object ThemeState {
         theme = ThemeData()
         icons = emptyMap()
     }
+
+
+    fun setGradientBlur(v: Float) {
+        theme = theme.copy(gradientBlur = v)
+    }
+    fun setGradientOpacity(v: Float) {
+        theme = theme.copy(gradientOpacity = v)
+    }
+    fun setGradientAngle(v: Float) {
+        theme = theme.copy(gradientAngle = v)
+    }
+    fun setGradientMidColor(v: String?) {
+        theme = theme.copy(gradientMidColor = v)
+    }
+    fun setGradientMode(v: String) {
+        theme = theme.copy(gradientMode = v)
+    }
+    fun setGradientStops(v: String) {
+        theme = theme.copy(gradientStops = v)
+    }
+    fun setBackgroundBlur(v: Float) {
+        theme = theme.copy(backgroundBlur = v)
+    }
+    fun setBackgroundSaturation(v: Float) {
+        theme = theme.copy(backgroundSaturation = v)
+    }
+    fun setBackgroundBrightness(v: Float) {
+        theme = theme.copy(backgroundBrightness = v)
+    }
 }

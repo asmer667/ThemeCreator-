@@ -98,5 +98,67 @@ fun ColorsSheet() {
                 }
             }
         }
+
+        // ─── قسم تحسينات التدرّج (يظهر فقط عند وجود تدرّج) ───
+        GradientTuningSection()
+
+        Spacer(Modifier.height(32.dp))
+    }
+}
+
+@Composable
+private fun GradientTuningSection() {
+    val theme = ThemeState.theme
+    if (theme.gradientStart == null || theme.gradientEnd == null) return
+
+    Column(Modifier.fillMaxWidth().padding(16.dp)) {
+        Divider(Modifier.padding(vertical = 12.dp))
+        Text("\u2699\ufe0f \u062a\u062d\u0633\u064a\u0646\u0627\u062a \u0627\u0644\u062a\u062f\u0631\u0651\u062c",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(8.dp))
+
+        // نمط التدرّج
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf("linear", "radial", "sweep").forEach { mode ->
+                FilterChip(
+                    selected = theme.gradientMode == mode,
+                    onClick = { ThemeState.setGradientMode(mode) },
+                    label = { Text(when(mode) {
+                        "linear" -> "\u062e\u0637\u064a"
+                        "radial" -> "\u062f\u0627\u0626\u0631\u064a"
+                        else -> "\u0634\u0639\u0627\u0639\u064a"
+                    }, style = MaterialTheme.typography.labelMedium) }
+                )
+            }
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        TuningSlider("\u0627\u062a\u062c\u0627\u0647",
+            theme.gradientAngle, 0f..360f) { ThemeState.setGradientAngle(it) }
+        TuningSlider("\u0636\u0628\u0627\u0628\u064a\u0629",
+            theme.gradientBlur, 0f..100f) { ThemeState.setGradientBlur(it) }
+        TuningSlider("\u0634\u0641\u0627\u0641\u064a\u0629",
+            theme.gradientOpacity, 0.1f..1f) { ThemeState.setGradientOpacity(it) }
+        TuningSlider("\u062a\u0648\u0632\u064a\u0639 \u0627\u0644\u0648\u0633\u0637",
+            theme.gradientStops.split(",").getOrNull(1)?.toFloatOrNull() ?: 0.5f,
+            0.1f..0.9f) {
+                ThemeState.setGradientStops("0.0,${"%.2f".format(it)},1.0")
+        }
+    }
+}
+
+@Composable
+private fun TuningSlider(label: String, value: Float, range: ClosedFloatingPointRange<Float>, onChange: (Float) -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(label, style = MaterialTheme.typography.labelMedium, modifier = Modifier.weight(1f))
+            Text("%.2f".format(value),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary)
+        }
+        Slider(value = value, onValueChange = onChange, valueRange = range)
     }
 }

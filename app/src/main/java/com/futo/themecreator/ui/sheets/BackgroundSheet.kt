@@ -98,12 +98,40 @@ fun BackgroundSheet() {
             }
 
             Spacer(Modifier.height(16.dp))
-            Text("شفافية الصورة: ${(ThemeState.backgroundImageOpacity * 100).toInt()}%",
+
+            Text("\ud83d\udd0d \u0634\u0641\u0627\u0641\u064a\u0629 \u0627\u0644\u0635\u0648\u0631\u0629: ${(ThemeState.backgroundImageOpacity * 100).toInt()}%",
                 style = MaterialTheme.typography.bodyMedium)
             Slider(
                 value = ThemeState.backgroundImageOpacity,
                 onValueChange = { ThemeState.setBackgroundOpacity(it) },
                 valueRange = 0.1f..1f
+            )
+
+            // ضبابية
+            Text("\ud83c\udf2b\ufe0f \u0636\u0628\u0627\u0628\u064a\u0629: ${(ThemeState.theme.backgroundBlur).toInt()}dp",
+                style = MaterialTheme.typography.bodyMedium)
+            Slider(
+                value = ThemeState.theme.backgroundBlur,
+                onValueChange = { ThemeState.setBackgroundBlur(it) },
+                valueRange = 0f..25f
+            )
+
+            // تشبّع
+            Text("\ud83c\udfa8 \u062a\u0634\u0628\u0651\u0639: ${(ThemeState.theme.backgroundSaturation * 100).toInt()}%",
+                style = MaterialTheme.typography.bodyMedium)
+            Slider(
+                value = ThemeState.theme.backgroundSaturation,
+                onValueChange = { ThemeState.setBackgroundSaturation(it) },
+                valueRange = 0f..2f
+            )
+
+            // سطوع
+            Text("\u2600\ufe0f \u0633\u0637\u0648\u0639: ${(ThemeState.theme.backgroundBrightness * 100).toInt()}%",
+                style = MaterialTheme.typography.bodyMedium)
+            Slider(
+                value = ThemeState.theme.backgroundBrightness,
+                onValueChange = { ThemeState.setBackgroundBrightness(it) },
+                valueRange = 0.3f..1.7f
             )
         }
         Spacer(Modifier.height(32.dp))

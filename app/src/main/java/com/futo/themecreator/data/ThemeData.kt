@@ -21,6 +21,15 @@ data class ThemeData(
     val gradientStart: String? = null,
     val gradientEnd: String? = null,
     val gradientAngle: Float = 45f,
+    val gradientMidColor: String? = null,
+    val gradientBlur: Float = 0f,
+    val gradientOpacity: Float = 1f,
+    val gradientMode: String = "linear",
+    val gradientStops: String = "0.0,0.5,1.0",
+    // ─── خلفية الصورة ───
+    val backgroundBlur: Float = 0f,
+    val backgroundSaturation: Float = 1f,
+    val backgroundBrightness: Float = 1f,
 
     // ═══════════ Font ═══════════
     /** اسم ملف الخط داخل مجلد fonts/ مثال: "Cairo-Regular.ttf" */

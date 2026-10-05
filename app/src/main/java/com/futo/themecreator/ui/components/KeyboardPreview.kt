@@ -82,6 +82,8 @@ fun KeyboardPreview(theme: ThemeData, scale: Float = 1.4f) {
     val rowGap    = (7.dp * scale)
     val keyRadius = (theme.roundedness * 8).dp
     val customFont = loadFontFamily(theme.fontName)
+    // M4/M5: gradientBlurApplied + backgroundBlur are applied via Modifiers
+    val gradientBlurApplied = theme.gradientBlur > 0f
 
     val gradientBrush: Brush? = remember(
         theme.gradientStart, theme.gradientEnd, theme.gradientAngle

@@ -10,6 +10,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.futo.themecreator.data.ThemeState
+import com.futo.themecreator.ui.components.CompactSliderRow
 
 /**
  * تبويب ضبط النص — حجم، وزن، تلميحات
@@ -149,11 +150,11 @@ private fun SliderRow(
             )
         }
         Spacer(Modifier.height(4.dp))
-        Slider(
+        CompactSliderRow(
+            label = "",
             value = value,
             onValueChange = onChange,
-            valueRange = range,
-            steps = ((range.endInclusive - range.start) / step).toInt() - 1,
+            range = range,
         )
     }
 }
