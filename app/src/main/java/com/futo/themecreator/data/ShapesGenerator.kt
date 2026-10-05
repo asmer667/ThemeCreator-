@@ -30,11 +30,20 @@ object ShapesGenerator {
     )
 
     /**
-     * يولّد PNG 3D للشكل المطلوب
+     * يولّد PNG 3D للشكل المطلوب مع تطبيق الدوران والحدة والميل.
+     *
+     * @param shapeId معرّف الشكل
+     * @param fillColor لون التعبئة (ARGB)
+     * @param rotation زاوية الدوران بالدرجات (0..360)
+     * @param sharpness حِدّة الزوايا: 0 = حاد جدًا، 1 = دائري جدًا
+     * @param tilt الميل بالدرجات (-45..45)
      */
     fun generate3DPNG(
         shapeId: String,
         fillColor: Int,
+        rotation: Float = 0f,
+        sharpness: Float = 0.5f,
+        tilt: Float = 0f,
         highlightAlpha: Int = 120,
         shadowAlpha: Int = 90,
     ): ByteArray {
@@ -42,11 +51,25 @@ object ShapesGenerator {
         val canvas = Canvas(bmp)
         canvas.drawColor(Color.TRANSPARENT)
 
-        val path = buildPath(shapeId)
+        val path = buildPath(shapeId, sharpness)
         val bounds = RectF()
         path.computeBounds(bounds, true)
 
-        // 1. الظل الخارجي (drop shadow)
+        // ─── تطبيق التحويلات (دوران + ميل) ───
+        canvas.save()
+        if (rotation != 0f || tilt != 0f) {
+            val m = Matrix()
+            m.postTranslate(-SIZE / 2f, -SIZE / 2f)
+            if (tilt != 0f) {
+                val skewRad = Math.toRadians(tilt.toDouble().coerceIn(-45.0, 45.0))
+                m.postSkew(Math.tan(skewRad).toFloat(), 0f)
+            }
+            if (rotation != 0f) m.postRotate(rotation)
+            m.postTranslate(SIZE / 2f, SIZE / 2f)
+            canvas.concat(m)
+        }
+
+        // 1. الظل الخارجي
         val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.argb(shadowAlpha, 0, 0, 0)
             setShadowLayer(12f, 0f, 6f, Color.argb(shadowAlpha, 0, 0, 0))
@@ -58,9 +81,9 @@ object ShapesGenerator {
             shader = LinearGradient(
                 0f, 0f, 0f, SIZE.toFloat(),
                 intArrayOf(
-                    lighten(fillColor, 0.35f),  // أعلى فاتح
-                    fillColor,                    // وسط
-                    darken(fillColor, 0.25f),    // أسفل داكن
+                    lighten(fillColor, 0.35f),
+                    fillColor,
+                    darken(fillColor, 0.25f),
                 ),
                 floatArrayOf(0f, 0.5f, 1f),
                 Shader.TileMode.CLAMP
@@ -68,7 +91,7 @@ object ShapesGenerator {
         }
         canvas.drawPath(path, gradientPaint)
 
-        // 3. اللمعة العلوية (highlight)
+        // 3. اللمعة العلوية
         val highlightPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             shader = LinearGradient(
                 0f, 0f, 0f, bounds.height() * 0.5f,
@@ -85,7 +108,7 @@ object ShapesGenerator {
         canvas.drawRect(0f, 0f, SIZE.toFloat(), bounds.height() * 0.5f, highlightPaint)
         canvas.restore()
 
-        // 4. الحدود (Outline)
+        // 4. الحدود
         val outlinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
             strokeWidth = 4f
@@ -93,7 +116,7 @@ object ShapesGenerator {
         }
         canvas.drawPath(path, outlinePaint)
 
-        // 5. حد داخلي فاتح (inner highlight)
+        // 5. حد داخلي فاتح
         val innerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
             strokeWidth = 2f
@@ -107,23 +130,35 @@ object ShapesGenerator {
         canvas.drawPath(insetPath, innerPaint)
         canvas.restore()
 
+        canvas.restore() // استرجاع تحويلات الدوران
+
         val out = ByteArrayOutputStream()
         bmp.compress(Bitmap.CompressFormat.PNG, 100, out)
         bmp.recycle()
         return out.toByteArray()
     }
 
-    private fun buildPath(id: String): Path {
+    private fun buildPath(id: String, sharpness: Float): Path {
         val p = Path()
         val cx = SIZE / 2f
         val cy = SIZE / 2f
         val r = SIZE / 2f - 16f
+        val s = sharpness.coerceIn(0f, 1f)
 
         when (id) {
-            "square" -> p.addRoundRect(RectF(16f, 16f, SIZE - 16f, SIZE - 16f), 8f, 8f, Path.Direction.CW)
-            "rounded" -> p.addRoundRect(RectF(16f, 16f, SIZE - 16f, SIZE - 16f), r * 0.5f, r * 0.5f, Path.Direction.CW)
+            "square" -> {
+                val cr = (4f + s * (r * 0.4f)).coerceAtLeast(2f)
+                p.addRoundRect(RectF(16f, 16f, SIZE - 16f, SIZE - 16f), cr, cr, Path.Direction.CW)
+            }
+            "rounded" -> {
+                val cr = r * (0.2f + s * 0.7f)
+                p.addRoundRect(RectF(16f, 16f, SIZE - 16f, SIZE - 16f), cr, cr, Path.Direction.CW)
+            }
             "circle", "3d_bubble" -> p.addCircle(cx, cy, r, Path.Direction.CW)
-            "capsule" -> p.addRoundRect(RectF(16f, cy - r * 0.5f, SIZE - 16f, cy + r * 0.5f), r * 0.5f, r * 0.5f, Path.Direction.CW)
+            "capsule" -> p.addRoundRect(
+                RectF(16f, cy - r * 0.5f, SIZE - 16f, cy + r * 0.5f),
+                r * 0.5f, r * 0.5f, Path.Direction.CW
+            )
             "hexagon", "3d_metal" -> regularPolygon(p, cx, cy, r, 6)
             "pentagon" -> regularPolygon(p, cx, cy, r, 5)
             "octagon" -> regularPolygon(p, cx, cy, r, 8)
@@ -145,7 +180,10 @@ object ShapesGenerator {
                 p.lineTo(24f, 60f)
                 p.close()
             }
-            else -> p.addRoundRect(RectF(16f, 16f, SIZE - 16f, SIZE - 16f), 40f, 40f, Path.Direction.CW)
+            else -> {
+                val cr = (10f + s * (r * 0.6f)).coerceAtLeast(4f)
+                p.addRoundRect(RectF(16f, 16f, SIZE - 16f, SIZE - 16f), cr, cr, Path.Direction.CW)
+            }
         }
         return p
     }
