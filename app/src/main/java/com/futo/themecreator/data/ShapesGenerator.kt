@@ -514,3 +514,56 @@ data class ShapeDef(
     val p1: Float = 0f,
     val p2: Float = 0f,
 )
+
+
+/**
+ * ذاكرة تخزين مؤقت للصور المصغّرة (Thumbnails) — LRU بسيطة.
+ * تحفظ آخر 120 صورة فقط لتقليل استخدام الذاكرة.
+ */
+object ShapeThumbnailCache {
+    private const val MAX_SIZE = 120
+    private const val THUMB_SIZE = 96
+
+    private val cache = object : LinkedHashMap<String, android.graphics.Bitmap>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: Map.Entry<String, android.graphics.Bitmap>): Boolean {
+            return size > MAX_SIZE
+        }
+    }
+
+    @Synchronized
+    fun get(
+        shapeId: String,
+        fillColor: Int,
+        rotation: Float,
+        sharpness: Float,
+        tilt: Float,
+    ): android.graphics.Bitmap {
+        val key = "$shapeId|$fillColor|$rotation|$sharpness|$tilt"
+        cache[key]?.let { return it }
+
+        val bytes = ShapesGenerator.generate3DPNG(
+            shapeId = shapeId,
+            fillColor = fillColor,
+            rotation = rotation,
+            sharpness = sharpness,
+            tilt = tilt,
+            highlightAlpha = 100,
+            shadowAlpha = 60,
+        )
+
+        val bmp = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            ?: return android.graphics.Bitmap.createBitmap(
+                THUMB_SIZE, THUMB_SIZE, android.graphics.Bitmap.Config.ARGB_8888
+            )
+
+        // تصغير إلى 96×96
+        val scaled = android.graphics.Bitmap.createScaledBitmap(bmp, THUMB_SIZE, THUMB_SIZE, true)
+        if (scaled != bmp) bmp.recycle()
+
+        cache[key] = scaled
+        return scaled
+    }
+
+    @Synchronized
+    fun clear() = cache.clear()
+}

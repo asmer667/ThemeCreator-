@@ -17,6 +17,18 @@ object ThemeState {
     var shapes3D by mutableStateOf<Set<String>>(emptySet())
     var keyGroupShapes by mutableStateOf<Map<KeyGroup, ShapeConfig>>(emptyMap())
     var fontsVersion by mutableStateOf(0)  // يُزاد عند تحميل خط جديد لإعادة الرسم
+
+    // ─── الأشكال المختارة لكل مجموعة ───
+    var selectedShapeKey by mutableStateOf(KeyGroup.LETTERS)
+    var selectedShapes by mutableStateOf<Map<KeyGroup, String>>(emptyMap())
+
+    fun isShapeSelected(shapeId: String): Boolean =
+        selectedShapes[selectedShapeKey] == shapeId
+
+    fun clearShapeSelection() {
+        selectedShapes = selectedShapes - selectedShapeKey
+        ShapeThumbnailCache.clear()
+    }
     var backgroundImageUri by mutableStateOf<android.net.Uri?>(null)
     var backgroundImageOpacity by mutableStateOf(0.5f)
 
