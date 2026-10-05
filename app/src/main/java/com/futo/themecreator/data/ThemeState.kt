@@ -15,6 +15,8 @@ object ThemeState {
 
     var icons by mutableStateOf<Map<String, Uri>>(emptyMap())
     var shapes3D by mutableStateOf<Set<String>>(emptySet())
+    var backgroundImageUri by mutableStateOf<android.net.Uri?>(null)
+    var backgroundImageOpacity by mutableStateOf(0.5f)
 
     /** تحديث حقل واحد في الثيم */
     fun update(field: String, value: String) {
@@ -110,6 +112,13 @@ object ThemeState {
     /** إعادة تعيين */
     fun toggleShape3D(fileName: String) {
         shapes3D = if (fileName in shapes3D) shapes3D - fileName else shapes3D + fileName
+    }
+
+    fun setBackgroundImage(uri: android.net.Uri?) {
+        backgroundImageUri = uri
+    }
+    fun setBackgroundOpacity(v: Float) {
+        backgroundImageOpacity = v
     }
 
     fun reset() {

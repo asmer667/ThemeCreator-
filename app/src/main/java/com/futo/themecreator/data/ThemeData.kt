@@ -15,6 +15,11 @@ data class ThemeData(
     val version: Int = 1,
     val description: String = "Theme created with FUTO Theme Creator",
 
+    // ═══════════ Background Image (behind keys) ═══════════
+    val backgroundImageUri: String? = null,
+    val backgroundImageOpacity: Float = 0.5f,
+    val backgroundActionBarOpacity: Float = 0.5f,
+
     // ═══════════ Options ═══════════
     val autoBorders: Boolean = true,
     val centerHints: Boolean = false,

@@ -20,11 +20,11 @@ object ZipPacker {
         theme: ThemeData,
         icons: Map<String, Uri>,
         shapes3D: Set<String> = emptySet(),
+        backgroundUri: Uri? = null,
         outputFile: File,
     ): File {
         outputFile.parentFile?.mkdirs()
 
-        // قراءة الأشكال 3D المختارة
         val shapes3DBytes = mutableMapOf<String, ByteArray>()
         shapes3D.forEach { fileName ->
             Shapes3DLoader.readBytes(context, fileName)?.let {
@@ -32,22 +32,30 @@ object ZipPacker {
             }
         }
 
+        var backgroundBytes: ByteArray? = null
+        var backgroundName: String? = null
+        if (backgroundUri != null) {
+            try {
+                context.contentResolver.openInputStream(backgroundUri)?.use {
+                    backgroundBytes = it.readBytes()
+                }
+                backgroundName = "background.png"
+            } catch (e: Exception) { e.printStackTrace() }
+        }
+
         ZipOutputStream(FileOutputStream(outputFile)).use { zos ->
             zos.setLevel(9)
 
-            // 1. Version
             zos.putNextEntry(ZipEntry(VERSION_FILE))
             zos.write(ByteBuffer.allocate(9).apply {
                 order(ByteOrder.LITTLE_ENDIAN); put(CURRENT_VERSION); putLong(Date().time)
             }.array())
             zos.closeEntry()
 
-            // 2. TOML
             zos.putNextEntry(ZipEntry(TOML_FILE))
-            zos.write(TomlGenerator.generate(theme, icons, shapes3DBytes.keys).toByteArray())
+            zos.write(TomlGenerator.generate(theme, icons, shapes3DBytes.keys, backgroundName).toByteArray())
             zos.closeEntry()
 
-            // 3. Icons (uploaded)
             icons.forEach { (name, uri) ->
                 try {
                     context.contentResolver.openInputStream(uri)?.use { input ->
@@ -57,10 +65,14 @@ object ZipPacker {
                 } catch (e: Exception) { e.printStackTrace() }
             }
 
-            // 4. Shapes 3D
             shapes3DBytes.forEach { (name, bytes) ->
                 zos.putNextEntry(ZipEntry(name))
                 zos.write(bytes); zos.closeEntry()
+            }
+
+            if (backgroundBytes != null && backgroundName != null) {
+                zos.putNextEntry(ZipEntry(backgroundName))
+                zos.write(backgroundBytes!!); zos.closeEntry()
             }
         }
         return outputFile
