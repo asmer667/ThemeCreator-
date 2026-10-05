@@ -29,6 +29,17 @@ object ThemeState {
         selectedShapes = selectedShapes - selectedShapeKey
         ShapeThumbnailCache.clear()
     }
+
+    fun getShapeConfig(group: KeyGroup): ShapeConfig? =
+        keyGroupShapes[group]
+
+    fun setShapeConfig(group: KeyGroup, config: ShapeConfig) {
+        keyGroupShapes = keyGroupShapes + (group to config)
+    }
+
+    fun clearShapeConfig(group: KeyGroup) {
+        keyGroupShapes = keyGroupShapes - group
+    }
     var backgroundImageUri by mutableStateOf<android.net.Uri?>(null)
     var backgroundImageOpacity by mutableStateOf(0.5f)
 

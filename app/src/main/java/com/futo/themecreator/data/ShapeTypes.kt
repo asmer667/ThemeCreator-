@@ -3,10 +3,10 @@ package com.futo.themecreator.data
 /**
  * مجموعة المفاتيح في لوحة المفاتيح — تُستخدم لتخصيص شكل كل مجموعة.
  */
-enum class KeyGroup {
-    TOP_ROWS,     // صف الأرقام و ⇧ / ⌫
-    LETTERS,      // صفوف الحروف
-    BOTTOM_ROWS,  // ?123 / 😊 / مسافة / . / ↵
+enum class KeyGroup(val display: String) {
+    TOP_ROWS("صف الأرقام"),
+    LETTERS("الحروف"),
+    BOTTOM_ROWS("الصف السفلي"),
 }
 
 /**
