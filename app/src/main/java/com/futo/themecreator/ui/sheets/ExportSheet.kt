@@ -25,7 +25,8 @@ fun ExportSheet(onDismiss: () -> Unit) {
     var lastFile by remember { mutableStateOf<File?>(null) }
 
     Column(Modifier.fillMaxWidth().padding(16.dp)) {
-        Text("📦 تصدير الثيم", style = MaterialTheme.typography.titleLarge,
+        Text("📦 تصدير الثيم",
+            style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(12.dp))
 
@@ -39,14 +40,16 @@ fun ExportSheet(onDismiss: () -> Unit) {
         OutlinedTextField(
             value = fileName,
             onValueChange = { fileName = it },
-            label = { Text("اسم الملف (بدون .zip)") },
+            label = { Text("اسم الملف") },
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(Modifier.height(12.dp))
-        Text("الأيقونات المرفوعة: ${ThemeState.icons.size}",
+        Text("الأيقونات: ${ThemeState.icons.size}",
             style = MaterialTheme.typography.bodySmall)
         Text("الأشكال 3D: ${ThemeState.shapes3D.size}",
+            style = MaterialTheme.typography.bodySmall)
+        Text("الخلفية: ${if (ThemeState.backgroundImageUri != null) "موجودة" else "لا يوجد"}",
             style = MaterialTheme.typography.bodySmall)
 
         Spacer(Modifier.height(16.dp))
@@ -54,7 +57,6 @@ fun ExportSheet(onDismiss: () -> Unit) {
         Button(
             onClick = {
                 try {
-                    // تحديث الاسم في ThemeData
                     val updated = ThemeState.theme.copy(name = themeName)
                     ThemeState.replace(updated)
 
@@ -66,7 +68,10 @@ fun ExportSheet(onDismiss: () -> Unit) {
                     val safeName = fileName.replace(Regex("[^a-zA-Z0-9_-]"), "_")
                     val outFile = File(dir, "$safeName.zip")
 
-                    ZipPacker.pack(context, updated, ThemeState.icons, ThemeState.shapes3D, outFile)
+                    ZipPacker.pack(
+                        context, updated, ThemeState.icons,
+                        ThemeState.shapes3D, ThemeState.backgroundImageUri, outFile
+                    )
                     lastFile = outFile
                     status = "✅ تم الحفظ:\n${outFile.absolutePath}"
                 } catch (e: Exception) {
@@ -81,7 +86,6 @@ fun ExportSheet(onDismiss: () -> Unit) {
         }
 
         Spacer(Modifier.height(8.dp))
-
         OutlinedButton(
             onClick = {
                 lastFile?.let { file ->

@@ -19,7 +19,7 @@ import com.futo.themecreator.data.ThemeStorage
 import com.futo.themecreator.ui.components.KeyboardPreview
 import com.futo.themecreator.ui.sheets.*
 
-enum class EditorSheet { COLORS, PRESETS, SHAPES, ICONS, EXPORT, NONE }
+enum class EditorSheet { COLORS, PRESETS, READY2, SHAPES, ICONS, BACKGROUND, EXPORT, NONE }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,25 +51,25 @@ fun EditorScreen(onBack: () -> Unit) {
             )
         }
     ) { padding ->
-        Column(
-            Modifier.fillMaxSize().padding(padding)
-        ) {
-            // شريط الأزرار (Tabs قابلة للتمرير)
+        Column(Modifier.fillMaxSize().padding(padding)) {
+            // شريط Tabs قابل للتمرير
             ScrollableTabRow(
                 selectedTabIndex = 0,
-                edgePadding = 12.dp,
+                edgePadding = 8.dp,
                 containerColor = MaterialTheme.colorScheme.surfaceContainerLow
             ) {
-                EditorTab("🎨 ألوان", Icons.Default.Save) { currentSheet = EditorSheet.COLORS }
-                EditorTab("✨ جاهزة", Icons.Default.Save) { currentSheet = EditorSheet.PRESETS }
-                EditorTab("🔷 أشكال", Icons.Default.Save) { currentSheet = EditorSheet.SHAPES }
-                EditorTab("🖼️ صور", Icons.Default.Save) { currentSheet = EditorSheet.ICONS }
-                EditorTab("📤 تصدير", Icons.Default.Save) { currentSheet = EditorSheet.EXPORT }
+                EditorTab("🎨 ألوان") { currentSheet = EditorSheet.COLORS }
+                EditorTab("✨ جاهزة") { currentSheet = EditorSheet.PRESETS }
+                EditorTab("🎯 جاهزة 2") { currentSheet = EditorSheet.READY2 }
+                EditorTab("🔷 أشكال") { currentSheet = EditorSheet.SHAPES }
+                EditorTab("🖼️ أيقونات") { currentSheet = EditorSheet.ICONS }
+                EditorTab("🌄 خلفية") { currentSheet = EditorSheet.BACKGROUND }
+                EditorTab("📤 تصدير") { currentSheet = EditorSheet.EXPORT }
             }
 
-            // ═══════ المعاينة الحية (دائماً ظاهرة) ═══════
+            // المعاينة الحية
             Box(
-                modifier = Modifier
+                Modifier
                     .weight(1f)
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.background)
@@ -82,7 +82,6 @@ fun EditorScreen(onBack: () -> Unit) {
         }
     }
 
-    // Bottom Sheet
     if (currentSheet != EditorSheet.NONE) {
         ModalBottomSheet(
             onDismissRequest = { currentSheet = EditorSheet.NONE },
@@ -92,8 +91,10 @@ fun EditorScreen(onBack: () -> Unit) {
             when (currentSheet) {
                 EditorSheet.COLORS -> ColorsSheet()
                 EditorSheet.PRESETS -> PresetsSheet()
+                EditorSheet.READY2 -> Ready2Sheet()
                 EditorSheet.SHAPES -> ShapesSheet()
                 EditorSheet.ICONS -> IconsSheet()
+                EditorSheet.BACKGROUND -> BackgroundSheet()
                 EditorSheet.EXPORT -> ExportSheet(onDismiss = { currentSheet = EditorSheet.NONE })
                 EditorSheet.NONE -> {}
             }
@@ -102,14 +103,10 @@ fun EditorScreen(onBack: () -> Unit) {
 }
 
 @Composable
-private fun EditorTab(
-    label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    onClick: () -> Unit,
-) {
+private fun EditorTab(label: String, onClick: () -> Unit) {
     Tab(
         selected = false,
         onClick = onClick,
-        text = { Text(label, style = MaterialTheme.typography.labelLarge) }
+        text = { Text(label, style = MaterialTheme.typography.labelMedium) }
     )
 }

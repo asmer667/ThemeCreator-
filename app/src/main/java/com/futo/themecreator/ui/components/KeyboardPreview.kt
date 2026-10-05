@@ -2,116 +2,132 @@ package com.futo.themecreator.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.futo.themecreator.data.ThemeData
+import com.futo.themecreator.data.ThemeState
 import com.futo.themecreator.utils.ColorUtils
 
-/**
- * معاينة كاملة للكيبورد — الألوان مفصلة لكل صف
- */
 @Composable
 fun KeyboardPreview(theme: ThemeData) {
-    val bg = ColorUtils.parseColor(theme.background)
-    val kbSurface = ColorUtils.parseColor(theme.keyboardSurface)
-    val kbContainer = ColorUtils.parseColor(theme.keyboardContainer)
-    val onKbContainer = ColorUtils.parseColor(theme.onKeyboardContainer)
-    val kbPress = ColorUtils.parseColor(theme.keyboardPress)
-    val kbVariant = ColorUtils.parseColor(theme.keyboardContainerVariant)
-    val primary = ColorUtils.parseColor(theme.primary)
-    val onPrimary = ColorUtils.parseColor(theme.onPrimary)
-    val outline = ColorUtils.parseColor(theme.outline)
+    val bgUri = ThemeState.backgroundImageUri
+    val shapes3D = ThemeState.shapes3D
+    val firstShape = shapes3D.firstOrNull()
 
-    val radius = (theme.roundedness * 6).dp
+    val outline = ColorUtils.parseColor(theme.outline)
     val keyRadius = (theme.roundedness * 10).dp
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(kbSurface, RoundedCornerShape(radius))
-            .padding(6.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .clip(RoundedCornerShape(20.dp))
+            .background(ColorUtils.parseColor(theme.keyboardSurface))
+            .border(1.dp, outline.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
     ) {
-        // ═══════ صف الأرقام ═══════
-        Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-            listOf("1","2","3","4","5","6","7","8","9","0").forEach { num ->
-                PreviewKey(num, theme, kbContainer, onKbContainer, outline, keyRadius)
-            }
+        // خلفية الصورة (خلف الأزرار)
+        if (bgUri != null) {
+            AsyncImage(
+                model = bgUri,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                alpha = theme.backgroundImageOpacity,
+                modifier = Modifier.matchParentSize()
+            )
         }
-        Spacer(Modifier.height(4.dp))
 
-        // ═══════ QWERTY ═══════
-        Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-            listOf("Q","W","E","R","T","Y","U","I","O","P").forEach { l ->
-                PreviewKey(l, theme, kbContainer, onKbContainer, outline, keyRadius)
-            }
-        }
-        Spacer(Modifier.height(4.dp))
-
-        // ═══════ ASDF ═══════
-        Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-            listOf("A","S","D","F","G","H","J","K","L").forEach { l ->
-                PreviewKey(l, theme, kbContainer, onKbContainer, outline, keyRadius)
-            }
-        }
-        Spacer(Modifier.height(4.dp))
-
-        // ═══════ ZXCV + Shift + Backspace ═══════
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(3.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            PreviewKey("⇧", theme, kbVariant, onKbContainer, outline, keyRadius, width = 38.dp)
-            listOf("Z","X","C","V","B","N","M").forEach { l ->
-                PreviewKey(l, theme, kbContainer, onKbContainer, outline, keyRadius)
-            }
-            PreviewKey("⌫", theme, kbVariant, onKbContainer, outline, keyRadius, width = 38.dp)
-        }
-        Spacer(Modifier.height(4.dp))
-
-        // ═══════ الصف السفلي ═══════
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(3.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // ?123
-            PreviewKey("?123", theme, kbVariant, onKbContainer, outline, keyRadius, width = 40.dp)
-            // Emoji
-            PreviewKey("😊", theme, kbVariant, onKbContainer, outline, keyRadius, width = 40.dp)
-            // Spacebar
-            Box(
-                modifier = Modifier
-                    .width(120.dp)
-                    .height(38.dp)
-                    .clip(RoundedCornerShape(keyRadius))
-                    .background(kbContainer)
-                    .then(
-                        if (theme.autoBorders)
-                            Modifier.border(1.dp, outline.copy(alpha=0.4f), RoundedCornerShape(keyRadius))
-                        else Modifier
-                    ),
-                contentAlignment = Alignment.Center
+            // Row 1
+            KeyRow(
+                listOf("Q","W","E","R","T","Y","U","I","O","P"),
+                theme, firstShape, keyRadius
+            )
+            Spacer(Modifier.height(5.dp))
+            // Row 2
+            KeyRow(
+                listOf("A","S","D","F","G","H","J","K","L"),
+                theme, firstShape, keyRadius
+            )
+            Spacer(Modifier.height(5.dp))
+            // Row 3 (with shift and backspace)
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Text("Arabic",
-                    fontSize = (11 * theme.scaleText).sp,
-                    color = onKbContainer.copy(alpha = 0.7f))
+                PreviewKey("⇧", theme, firstShape, keyRadius,
+                    bgColor = ColorUtils.parseColor(theme.keyboardContainerVariant),
+                    width = 42.dp)
+                listOf("Z","X","C","V","B","N","M").forEach { l ->
+                    PreviewKey(l, theme, firstShape, keyRadius)
+                }
+                PreviewKey("⌫", theme, firstShape, keyRadius,
+                    bgColor = ColorUtils.parseColor(theme.keyboardContainerVariant),
+                    width = 42.dp)
             }
-            // .
-            PreviewKey(".", theme, kbContainer, onKbContainer, outline, keyRadius, width = 30.dp)
-            // Enter
-            PreviewKey("↵", theme, primary, onPrimary, outline, keyRadius, width = 44.dp)
+            Spacer(Modifier.height(5.dp))
+            // Row 4 (bottom bar)
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                PreviewKey("?123", theme, firstShape, keyRadius,
+                    bgColor = ColorUtils.parseColor(theme.keyboardContainerVariant),
+                    width = 46.dp)
+                PreviewKey("😊", theme, firstShape, keyRadius,
+                    bgColor = ColorUtils.parseColor(theme.keyboardContainerVariant),
+                    width = 40.dp)
+                // Spacebar
+                Box(
+                    Modifier.width(130.dp).height(40.dp)
+                        .clip(RoundedCornerShape(keyRadius))
+                        .background(ColorUtils.parseColor(theme.keyboardContainer))
+                        .border(1.dp, outline.copy(alpha = 0.4f), RoundedCornerShape(keyRadius)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Arabic",
+                        fontSize = (12 * theme.scaleText).sp,
+                        color = ColorUtils.parseColor(theme.onKeyboardContainer).copy(alpha = 0.7f))
+                }
+                PreviewKey(".", theme, firstShape, keyRadius, width = 32.dp)
+                PreviewKey("↵", theme, firstShape, keyRadius,
+                    bgColor = ColorUtils.parseColor(theme.primary),
+                    textColor = ColorUtils.parseColor(theme.onPrimary),
+                    width = 48.dp)
+            }
+        }
+    }
+}
+
+@Composable
+private fun KeyRow(
+    letters: List<String>,
+    theme: ThemeData,
+    shape: String?,
+    radius: androidx.compose.ui.unit.Dp,
+) {
+    Row(
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        letters.forEach { l ->
+            PreviewKey(l, theme, shape, radius)
         }
     }
 }
@@ -120,35 +136,45 @@ fun KeyboardPreview(theme: ThemeData) {
 private fun PreviewKey(
     text: String,
     theme: ThemeData,
-    bgColor: Color,
-    textColor: Color,
-    outline: Color,
+    shape: String?,
     radius: androidx.compose.ui.unit.Dp,
-    width: androidx.compose.ui.unit.Dp = 30.dp,
+    bgColor: Color = ColorUtils.parseColor(theme.keyboardContainer),
+    textColor: Color = ColorUtils.parseColor(theme.onKeyboardContainer),
+    width: androidx.compose.ui.unit.Dp = 32.dp,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val isPressed by interaction.collectIsPressedAsState()
     val kbPress = ColorUtils.parseColor(theme.keyboardPress)
-
-    val effectiveBg = if (isPressed) kbPress else bgColor
+    val outline = ColorUtils.parseColor(theme.outline)
 
     Box(
         modifier = Modifier
+            .padding(horizontal = 2.dp)
             .width(width)
-            .height(38.dp)
+            .height(40.dp)
             .clip(RoundedCornerShape(radius))
-            .background(effectiveBg)
+            .background(if (isPressed) kbPress else bgColor)
             .then(
                 if (theme.autoBorders)
-                    Modifier.border(1.dp, outline.copy(alpha=0.4f), RoundedCornerShape(radius))
+                    Modifier.border(1.dp, outline.copy(alpha = 0.4f), RoundedCornerShape(radius))
                 else Modifier
-            )
-            .clickable(interactionSource = interaction, indication = null) {},
+            ),
         contentAlignment = Alignment.Center
     ) {
-        Text(text,
+        // شكل 3D خلف الزر
+        if (shape != null) {
+            AsyncImage(
+                model = "file:///android_asset/shapes_3d/$shape",
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxSize().padding(3.dp)
+            )
+        }
+        Text(
+            text,
             fontSize = (13 * theme.scaleText).sp,
             fontWeight = FontWeight(theme.weightText.toInt().coerceIn(100, 900)),
-            color = textColor)
+            color = textColor
+        )
     }
 }
