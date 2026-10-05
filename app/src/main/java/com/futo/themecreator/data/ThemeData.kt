@@ -18,6 +18,27 @@ data class ThemeData(
     // ═══════════ Background Image (behind keys) ═══════════
     val backgroundImageUri: String? = null,
     val backgroundImageOpacity: Float = 0.5f,
+    val gradientStart: String? = null,
+    val gradientEnd: String? = null,
+    val gradientAngle: Float = 45f,
+
+    // ═══════════ Font ═══════════
+    /** اسم ملف الخط داخل مجلد fonts/ مثال: "Cairo-Regular.ttf" */
+    val fontName: String? = null,
+
+    // ═══════════ Custom Button Images ═══════════
+    /**
+     * خرائط اسم زر FUTO الرسمي → مسار/اسم الملف.
+     * الأسماء الرسمية: Button-default.png, Button-default-press.png,
+     * Button-default-dark.png, Button-default-press-dark.png,
+     * Button-function.png, Button-function-pressed.png,
+     * Button-function2.png, Button-function2-pressed.png,
+     * Button-space-dark.png, Button-space-press.png,
+     * Button-action.png, Button-action-press.png,
+     * Button-alt1.png, Button-alt2.png, Button-alt3.png
+     */
+    val customButtonImages: Map<String, String> = emptyMap(),
+    val customIconImages: Map<String, String> = emptyMap(),
     val backgroundActionBarOpacity: Float = 0.5f,
 
     // ═══════════ Options ═══════════

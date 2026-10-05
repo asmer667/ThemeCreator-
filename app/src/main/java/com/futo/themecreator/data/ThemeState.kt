@@ -16,6 +16,7 @@ object ThemeState {
     var icons by mutableStateOf<Map<String, Uri>>(emptyMap())
     var shapes3D by mutableStateOf<Set<String>>(emptySet())
     var keyGroupShapes by mutableStateOf<Map<KeyGroup, ShapeConfig>>(emptyMap())
+    var fontsVersion by mutableStateOf(0)  // يُزاد عند تحميل خط جديد لإعادة الرسم
     var backgroundImageUri by mutableStateOf<android.net.Uri?>(null)
     var backgroundImageOpacity by mutableStateOf(0.5f)
 

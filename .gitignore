@@ -9,3 +9,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+.backups/
+futo_extract/

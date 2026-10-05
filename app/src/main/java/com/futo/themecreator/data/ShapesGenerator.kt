@@ -213,6 +213,41 @@ object ShapesGenerator {
         return out.toByteArray()
     }
 
+    /**
+     * يولّد صورة PNG لتدرّج خطّي بين لونين.
+     * تُستخدم لخلفية الكيبورد (FUTO تقرأ الصور لا النصوص).
+     */
+    fun generateGradientPNG(
+        color1Hex: String,
+        color2Hex: String,
+        angleDeg: Float = 45f,
+        size: Int = 512,
+    ): ByteArray {
+        val c1 = android.graphics.Color.parseColor(color1Hex)
+        val c2 = android.graphics.Color.parseColor(color2Hex)
+        val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bmp)
+
+        val rad = Math.toRadians(angleDeg.toDouble())
+        val dx = Math.cos(rad).toFloat() * size
+        val dy = Math.sin(rad).toFloat() * size
+
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            shader = LinearGradient(
+                0f, 0f, dx, dy,
+                intArrayOf(c1, c2),
+                floatArrayOf(0f, 1f),
+                Shader.TileMode.CLAMP,
+            )
+        }
+        canvas.drawRect(0f, 0f, size.toFloat(), size.toFloat(), paint)
+
+        val out = ByteArrayOutputStream()
+        bmp.compress(Bitmap.CompressFormat.PNG, 100, out)
+        bmp.recycle()
+        return out.toByteArray()
+    }
+
     private fun buildPath(def: ShapeDef, sharpness: Float): Path {
         val p = Path()
         val cx = SIZE / 2f

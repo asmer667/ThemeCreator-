@@ -1,6 +1,7 @@
 package com.futo.themecreator.data
 
 object PresetApplier {
+
     fun applySolid(preset: SolidPreset, dark: Boolean) {
         val t = ThemeState.theme
         val onAccent = "#FFFFFF"
@@ -25,6 +26,8 @@ object PresetApplier {
             keyboardContainer = preset.surface, keyboardContainerVariant = preset.container,
             onKeyboardContainer = onBg, keyboardPress = preset.accent,
             keyboardContainerPressed = preset.container, onKeyboardContainerPressed = onBg,
+            gradientStart = null,
+            gradientEnd = null,
         ))
     }
 
@@ -52,6 +55,9 @@ object PresetApplier {
             keyboardContainer = preset.color1 + "22", keyboardContainerVariant = preset.color2,
             onKeyboardContainer = onBg, keyboardPress = preset.color1,
             keyboardContainerPressed = preset.color2, onKeyboardContainerPressed = onAccent,
+            gradientStart = preset.color1,
+            gradientEnd = preset.color2,
+            gradientAngle = 135f,
         ))
     }
 }

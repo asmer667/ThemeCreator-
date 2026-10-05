@@ -8,9 +8,8 @@ object Ready2Applier {
     fun applySolid(preset: Ready2Preset) {
         val t = ThemeState.theme
         val bg = preset.bg
-        // حسبة علىBackground فقط
         val onBg = if (isDark(bg)) "#FFFFFF" else "#1A1A1A"
-        
+
         ThemeState.replace(t.copy(
             background = bg,
             onBackground = onBg,
@@ -27,6 +26,8 @@ object Ready2Applier {
             surfaceContainerLowest = shade(bg, -0.1f),
             keyboardSurface = bg,
             keyboardSurfaceDim = shade(bg, -0.05f),
+            gradientStart = null,
+            gradientEnd = null,
             // لا نلمس keyboardContainer أو primary
         ))
     }
@@ -35,10 +36,9 @@ object Ready2Applier {
         val t = ThemeState.theme
         val c1 = preset.color1 ?: preset.bg
         val c2 = preset.color2 ?: preset.bg
-        // نستخدم اللون الأول للخلفية الأساسية
         val bg = preset.bg
         val onBg = if (isDark(bg)) "#FFFFFF" else "#1A1A1A"
-        
+
         ThemeState.replace(t.copy(
             background = bg,
             onBackground = onBg,
@@ -55,6 +55,9 @@ object Ready2Applier {
             surfaceContainerLowest = bg,
             keyboardSurface = bg,
             keyboardSurfaceDim = bg,
+            gradientStart = c1,
+            gradientEnd = c2,
+            gradientAngle = 135f,
             // لا نلمس keyboardContainer
         ))
     }
