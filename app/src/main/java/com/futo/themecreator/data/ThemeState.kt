@@ -14,6 +14,7 @@ object ThemeState {
         private set
 
     var icons by mutableStateOf<Map<String, Uri>>(emptyMap())
+    var shapes3D by mutableStateOf<Set<String>>(emptySet())
         private set
 
     /** تحديث حقل واحد في الثيم */
@@ -108,7 +109,12 @@ object ThemeState {
     }
 
     /** إعادة تعيين */
+    fun toggleShape3D(fileName: String) {
+        shapes3D = if (fileName in shapes3D) shapes3D - fileName else shapes3D + fileName
+    }
+
     fun reset() {
+        shapes3D = emptySet()
         theme = ThemeData()
         icons = emptyMap()
     }

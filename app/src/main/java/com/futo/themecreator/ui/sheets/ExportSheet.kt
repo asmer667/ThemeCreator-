@@ -19,27 +19,54 @@ import java.io.File
 @Composable
 fun ExportSheet(onDismiss: () -> Unit) {
     val context = LocalContext.current
-    val theme = ThemeState.theme
-    val icons = ThemeState.icons
+    var themeName by remember { mutableStateOf(ThemeState.theme.name) }
+    var fileName by remember { mutableStateOf(ThemeState.theme.id.replace(".", "_")) }
     var status by remember { mutableStateOf("") }
     var lastFile by remember { mutableStateOf<File?>(null) }
 
     Column(Modifier.fillMaxWidth().padding(16.dp)) {
         Text("📦 تصدير الثيم", style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold)
+        Spacer(Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = themeName,
+            onValueChange = { themeName = it },
+            label = { Text("اسم الثيم (يظهر في الكيبورد)") },
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(Modifier.height(8.dp))
-        Text("الاسم: ${theme.name}")
-        Text("الأيقونات: ${icons.size}")
+        OutlinedTextField(
+            value = fileName,
+            onValueChange = { fileName = it },
+            label = { Text("اسم الملف (بدون .zip)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(Modifier.height(12.dp))
+        Text("الأيقونات المرفوعة: ${ThemeState.icons.size}",
+            style = MaterialTheme.typography.bodySmall)
+        Text("الأشكال 3D: ${ThemeState.shapes3D.size}",
+            style = MaterialTheme.typography.bodySmall)
+
         Spacer(Modifier.height(16.dp))
 
         Button(
             onClick = {
                 try {
-                    val dir = File(Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_DOWNLOADS), "FUTOThemes")
+                    // تحديث الاسم في ThemeData
+                    val updated = ThemeState.theme.copy(name = themeName)
+                    ThemeState.replace(updated)
+
+                    val dir = File(
+                        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                        "FUTOThemes"
+                    )
                     dir.mkdirs()
-                    val outFile = File(dir, "${theme.id.replace(".", "_")}.zip")
-                    ZipPacker.pack(context, theme, icons, outFile)
+                    val safeName = fileName.replace(Regex("[^a-zA-Z0-9_-]"), "_")
+                    val outFile = File(dir, "$safeName.zip")
+
+                    ZipPacker.pack(context, updated, ThemeState.icons, ThemeState.shapes3D, outFile)
                     lastFile = outFile
                     status = "✅ تم الحفظ:\n${outFile.absolutePath}"
                 } catch (e: Exception) {
@@ -63,7 +90,7 @@ fun ExportSheet(onDismiss: () -> Unit) {
                             type = "application/zip"
                             putExtra(Intent.EXTRA_STREAM, android.net.Uri.fromFile(file))
                         }
-                        context.startActivity(Intent.createChooser(intent, "مشاركة"))
+                        context.startActivity(Intent.createChooser(intent, "مشاركة الثيم"))
                     } catch (e: Exception) { status = "❌ ${e.message}" }
                 }
             },

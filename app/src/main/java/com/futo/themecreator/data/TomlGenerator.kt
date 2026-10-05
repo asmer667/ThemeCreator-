@@ -2,24 +2,20 @@ package com.futo.themecreator.data
 
 import android.net.Uri
 
-/**
- * يحوّل ThemeData + الأيقونات إلى ملف theme.txt (TOML)
- */
 object TomlGenerator {
-
-    fun generate(theme: ThemeData, icons: Map<String, Uri> = emptyMap()): String {
+    fun generate(
+        theme: ThemeData,
+        icons: Map<String, Uri> = emptyMap(),
+        shapeFiles: Set<String> = emptySet(),
+    ): String {
         val sb = StringBuilder()
-
-        // ═══════ Metadata ═══════
         sb.appendLine("# Format version: 1.0")
-        sb.appendLine("name = \"${escape(theme.name)}\"")
-        sb.appendLine("author = \"${escape(theme.author)}\"")
-        sb.appendLine("id = \"${escape(theme.id)}\"")
+        sb.appendLine("name = \"${esc(theme.name)}\"")
+        sb.appendLine("author = \"${esc(theme.author)}\"")
+        sb.appendLine("id = \"${esc(theme.id)}\"")
         sb.appendLine("version = ${theme.version}")
-        sb.appendLine("description = \"${escape(theme.description)}\"")
+        sb.appendLine("description = \"${esc(theme.description)}\"")
         sb.appendLine()
-
-        // ═══════ Options ═══════
         sb.appendLine("[options]")
         sb.appendLine("auto_borders = ${theme.autoBorders}")
         sb.appendLine("center_hints = ${theme.centerHints}")
@@ -29,21 +25,27 @@ object TomlGenerator {
         sb.appendLine("weight_text = ${theme.weightText}")
         sb.appendLine("weight_hints = ${theme.weightHints}")
         sb.appendLine()
-
-        // ═══════ Colors ═══════
         sb.appendLine("[colors]")
-        theme.allColors().forEach { (key, value) ->
-            sb.appendLine("$key = \"$value\"")
-        }
+        theme.allColors().forEach { (k, v) -> sb.appendLine("$k = \"$v\"") }
 
-        // ═══════ Matchrules (للأيقونات) ═══════
-        if (icons.isNotEmpty()) {
-            sb.append(MatchruleGenerator.generate(icons))
-        }
+        if (icons.isNotEmpty() || shapeFiles.isNotEmpty()) {
+            sb.appendLine()
+            sb.appendLine("[matchrules]")
 
+            // أيقونات مرفوعة
+            icons.keys.forEach { name ->
+                val base = name.removeSuffix(".png")
+                sb.appendLine("border = [{ selector = \"$base\", asset = \"$name\" }]")
+            }
+
+            // أشكال 3D (يُطبّق على كل الأزرار)
+            shapeFiles.forEach { fileName ->
+                val base = fileName.removeSuffix(".png")
+                sb.appendLine("border = [{ selector = \"$base\", asset = \"$fileName\" }]")
+            }
+        }
         return sb.toString()
     }
 
-    private fun escape(s: String): String =
-        s.replace("\\", "\\\\").replace("\"", "\\\"")
+    private fun esc(s: String) = s.replace("\\", "\\\\").replace("\"", "\\\"")
 }

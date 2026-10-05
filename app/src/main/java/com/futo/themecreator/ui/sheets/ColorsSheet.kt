@@ -1,64 +1,100 @@
 package com.futo.themecreator.ui.sheets
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.futo.themecreator.data.ThemeState
 import com.futo.themecreator.ui.components.ColorPickerDialog
-import com.futo.themecreator.ui.components.ColorRow
 import com.futo.themecreator.utils.ColorUtils
 
 @Composable
 fun ColorsSheet() {
     val theme = ThemeState.theme
-    var selectedColorKey by remember { mutableStateOf<String?>(null) }
-    var selectedColorName by remember { mutableStateOf("") }
-    var selectedColorValue by remember { mutableStateOf("") }
+    var selectedKey by remember { mutableStateOf<String?>(null) }
+    var selectedName by remember { mutableStateOf("") }
+    var selectedValue by remember { mutableStateOf("") }
 
-    if (selectedColorKey != null) {
+    if (selectedKey != null) {
         ColorPickerDialog(
-            initialColor = selectedColorValue,
-            colorName = selectedColorName,
-            onDismiss = { selectedColorKey = null },
+            initialColor = selectedValue,
+            colorName = selectedName,
+            onDismiss = { selectedKey = null },
             onConfirm = { newColor ->
-                ThemeState.update(selectedColorKey!!, newColor)
-                selectedColorKey = null
+                ThemeState.update(selectedKey!!, newColor)
+                selectedKey = null
             }
         )
     }
 
     Column(Modifier.fillMaxWidth()) {
-        Text("🎨 الألوان (44)", style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold, modifier = Modifier.padding(16.dp))
+        Text("🎨 محرر الألوان",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(16.dp))
+        Text("اضغط على أي لون لتعديله",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp))
+        Spacer(Modifier.height(12.dp))
 
-        LazyColumn(
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
             modifier = Modifier.fillMaxWidth().heightIn(max = 500.dp),
-            contentPadding = PaddingValues(bottom = 32.dp)
+            contentPadding = PaddingValues(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             ColorUtils.colorCategories.forEach { category ->
-                item {
-                    Text(category.name, style = MaterialTheme.typography.titleSmall,
+                item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(2) }) {
+                    Text(category.name,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(16.dp, 12.dp, 16.dp, 4.dp),
-                        color = MaterialTheme.colorScheme.primary)
-                    HorizontalDivider()
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 8.dp))
                 }
                 items(category.keys) { (key, displayName) ->
-                    val currentValue = theme.allColors()
-                        .firstOrNull { it.first == key }?.second ?: "#000000"
-                    ColorRow(
-                        colorKey = key, displayName = displayName, value = currentValue,
+                    val value = theme.allColors().firstOrNull { it.first == key }?.second ?: "#000000"
+                    Card(
                         onClick = {
-                            selectedColorKey = key
-                            selectedColorName = displayName
-                            selectedColorValue = currentValue
+                            selectedKey = key
+                            selectedName = displayName
+                            selectedValue = value
+                        },
+                        modifier = Modifier.fillMaxWidth().height(70.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Row(
+                            Modifier.fillMaxSize().padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                Modifier.size(32.dp).clip(RoundedCornerShape(8.dp))
+                                    .background(ColorUtils.parseColor(value))
+                                    .border(1.dp, Color.Gray, RoundedCornerShape(8.dp))
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text(displayName, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                                Text(value, style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary)
+                            }
                         }
-                    )
+                    }
                 }
             }
         }

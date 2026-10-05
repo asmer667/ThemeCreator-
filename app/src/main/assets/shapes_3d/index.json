@@ -1,0 +1,242 @@
+[
+  {
+    "file": "square_red.png",
+    "name": "مربع أحمر",
+    "category": "مربعات"
+  },
+  {
+    "file": "square_blue.png",
+    "name": "مربع أزرق",
+    "category": "مربعات"
+  },
+  {
+    "file": "square_green.png",
+    "name": "مربع أخضر",
+    "category": "مربعات"
+  },
+  {
+    "file": "square_yellow.png",
+    "name": "مربع أصفر",
+    "category": "مربعات"
+  },
+  {
+    "file": "square_purple.png",
+    "name": "مربع بنفسجي",
+    "category": "مربعات"
+  },
+  {
+    "file": "square_orange.png",
+    "name": "مربع برتقالي",
+    "category": "مربعات"
+  },
+  {
+    "file": "square_gray.png",
+    "name": "مربع رمادي",
+    "category": "مربعات"
+  },
+  {
+    "file": "square_pink.png",
+    "name": "مربع وردي",
+    "category": "مربعات"
+  },
+  {
+    "file": "circle_red.png",
+    "name": "دائرة حمراء",
+    "category": "دوائر"
+  },
+  {
+    "file": "circle_blue.png",
+    "name": "دائرة زرقاء",
+    "category": "دوائر"
+  },
+  {
+    "file": "circle_green.png",
+    "name": "دائرة خضراء",
+    "category": "دوائر"
+  },
+  {
+    "file": "circle_yellow.png",
+    "name": "دائرة صفراء",
+    "category": "دوائر"
+  },
+  {
+    "file": "circle_purple.png",
+    "name": "دائرة بنفسجية",
+    "category": "دوائر"
+  },
+  {
+    "file": "circle_orange.png",
+    "name": "دائرة برتقالية",
+    "category": "دوائر"
+  },
+  {
+    "file": "circle_cyan.png",
+    "name": "دائرة سماوية",
+    "category": "دوائر"
+  },
+  {
+    "file": "circle_pink.png",
+    "name": "دائرة وردية",
+    "category": "دوائر"
+  },
+  {
+    "file": "triangle_red.png",
+    "name": "مثلث أحمر",
+    "category": "مثلثات"
+  },
+  {
+    "file": "triangle_blue.png",
+    "name": "مثلث أزرق",
+    "category": "مثلثات"
+  },
+  {
+    "file": "triangle_green.png",
+    "name": "مثلث أخضر",
+    "category": "مثلثات"
+  },
+  {
+    "file": "triangle_yellow.png",
+    "name": "مثلث أصفر",
+    "category": "مثلثات"
+  },
+  {
+    "file": "triangle_purple.png",
+    "name": "مثلث بنفسجي",
+    "category": "مثلثات"
+  },
+  {
+    "file": "triangle_orange.png",
+    "name": "مثلث برتقالي",
+    "category": "مثلثات"
+  },
+  {
+    "file": "diamond_red.png",
+    "name": "معيّن أحمر",
+    "category": "معيّنات"
+  },
+  {
+    "file": "diamond_blue.png",
+    "name": "معيّن أزرق",
+    "category": "معيّنات"
+  },
+  {
+    "file": "diamond_green.png",
+    "name": "معيّن أخضر",
+    "category": "معيّنات"
+  },
+  {
+    "file": "diamond_purple.png",
+    "name": "معيّن بنفسجي",
+    "category": "معيّنات"
+  },
+  {
+    "file": "diamond_cyan.png",
+    "name": "معيّن سماوي",
+    "category": "معيّنات"
+  },
+  {
+    "file": "star_gold.png",
+    "name": "نجمة ذهبية",
+    "category": "نجوم"
+  },
+  {
+    "file": "star_red.png",
+    "name": "نجمة حمراء",
+    "category": "نجوم"
+  },
+  {
+    "file": "star_blue.png",
+    "name": "نجمة زرقاء",
+    "category": "نجوم"
+  },
+  {
+    "file": "star_cyan.png",
+    "name": "نجمة سماوية",
+    "category": "نجوم"
+  },
+  {
+    "file": "star_purple.png",
+    "name": "نجمة بنفسجية",
+    "category": "نجوم"
+  },
+  {
+    "file": "hex_red.png",
+    "name": "سداسي أحمر",
+    "category": "مسدسات"
+  },
+  {
+    "file": "hex_blue.png",
+    "name": "سداسي أزرق",
+    "category": "مسدسات"
+  },
+  {
+    "file": "hex_green.png",
+    "name": "سداسي أخضر",
+    "category": "مسدسات"
+  },
+  {
+    "file": "hex_purple.png",
+    "name": "سداسي بنفسجي",
+    "category": "مسدسات"
+  },
+  {
+    "file": "hex_gold.png",
+    "name": "سداسي ذهبي",
+    "category": "مسدسات"
+  },
+  {
+    "file": "pent_red.png",
+    "name": "خماسي أحمر",
+    "category": "خماسيات"
+  },
+  {
+    "file": "pent_blue.png",
+    "name": "خماسي أزرق",
+    "category": "خماسيات"
+  },
+  {
+    "file": "pent_green.png",
+    "name": "خماسي أخضر",
+    "category": "خماسيات"
+  },
+  {
+    "file": "heart_red.png",
+    "name": "قلب أحمر",
+    "category": "قلوب"
+  },
+  {
+    "file": "heart_pink.png",
+    "name": "قلب وردي",
+    "category": "قلوب"
+  },
+  {
+    "file": "heart_purple.png",
+    "name": "قلب بنفسجي",
+    "category": "قلوب"
+  },
+  {
+    "file": "capsule_blue.png",
+    "name": "كبسولة زرقاء",
+    "category": "كبسولات"
+  },
+  {
+    "file": "capsule_gray.png",
+    "name": "كبسولة رمادية",
+    "category": "كبسولات"
+  },
+  {
+    "file": "capsule_green.png",
+    "name": "كبسولة خضراء",
+    "category": "كبسولات"
+  },
+  {
+    "file": "octagon_red.png",
+    "name": "ثماني أحمر",
+    "category": "ثمانيات"
+  },
+  {
+    "file": "octagon_blue.png",
+    "name": "ثماني أزرق",
+    "category": "ثمانيات"
+  }
+]

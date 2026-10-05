@@ -11,7 +11,6 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
 object ZipPacker {
-
     private const val VERSION_FILE = "FUTOKeyboardTheme_Version"
     private const val TOML_FILE = "theme.txt"
     private const val CURRENT_VERSION: Byte = 1
@@ -20,64 +19,50 @@ object ZipPacker {
         context: Context,
         theme: ThemeData,
         icons: Map<String, Uri>,
+        shapes3D: Set<String> = emptySet(),
         outputFile: File,
     ): File {
         outputFile.parentFile?.mkdirs()
 
+        // قراءة الأشكال 3D المختارة
+        val shapes3DBytes = mutableMapOf<String, ByteArray>()
+        shapes3D.forEach { fileName ->
+            Shapes3DLoader.readBytes(context, fileName)?.let {
+                shapes3DBytes[fileName] = it
+            }
+        }
+
         ZipOutputStream(FileOutputStream(outputFile)).use { zos ->
             zos.setLevel(9)
 
-            // 1. ملف الإصدار
-            putVersionFile(zos)
+            // 1. Version
+            zos.putNextEntry(ZipEntry(VERSION_FILE))
+            zos.write(ByteBuffer.allocate(9).apply {
+                order(ByteOrder.LITTLE_ENDIAN); put(CURRENT_VERSION); putLong(Date().time)
+            }.array())
+            zos.closeEntry()
 
-            // 2. theme.txt (مع الأيقونات)
-            putTomlFile(zos, theme, icons)
+            // 2. TOML
+            zos.putNextEntry(ZipEntry(TOML_FILE))
+            zos.write(TomlGenerator.generate(theme, icons, shapes3DBytes.keys).toByteArray())
+            zos.closeEntry()
 
-            // 3. الأيقونات PNG
+            // 3. Icons (uploaded)
             icons.forEach { (name, uri) ->
-                putIconFile(zos, context, name, uri)
+                try {
+                    context.contentResolver.openInputStream(uri)?.use { input ->
+                        zos.putNextEntry(ZipEntry(name))
+                        input.copyTo(zos); zos.closeEntry()
+                    }
+                } catch (e: Exception) { e.printStackTrace() }
             }
-        }
 
-        return outputFile
-    }
-
-    private fun putVersionFile(zos: ZipOutputStream) {
-        zos.putNextEntry(ZipEntry(VERSION_FILE))
-        val bytes = ByteBuffer.allocate(9).apply {
-            order(ByteOrder.LITTLE_ENDIAN)
-            put(CURRENT_VERSION)
-            putLong(Date().time)
-        }.array()
-        zos.write(bytes)
-        zos.closeEntry()
-    }
-
-    private fun putTomlFile(
-        zos: ZipOutputStream,
-        theme: ThemeData,
-        icons: Map<String, Uri>,
-    ) {
-        zos.putNextEntry(ZipEntry(TOML_FILE))
-        val content = TomlGenerator.generate(theme, icons)
-        zos.write(content.toByteArray(Charsets.UTF_8))
-        zos.closeEntry()
-    }
-
-    private fun putIconFile(
-        zos: ZipOutputStream,
-        context: Context,
-        name: String,
-        uri: Uri,
-    ) {
-        try {
-            context.contentResolver.openInputStream(uri)?.use { input ->
+            // 4. Shapes 3D
+            shapes3DBytes.forEach { (name, bytes) ->
                 zos.putNextEntry(ZipEntry(name))
-                input.copyTo(zos)
-                zos.closeEntry()
+                zos.write(bytes); zos.closeEntry()
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
+        return outputFile
     }
 }

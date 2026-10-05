@@ -2,10 +2,13 @@ package com.futo.themecreator.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,7 +20,7 @@ import com.futo.themecreator.data.ThemeData
 import com.futo.themecreator.utils.ColorUtils
 
 /**
- * معاينة كاملة للكيبورد مع الثيم المطبق
+ * معاينة كاملة للكيبورد — الألوان مفصلة لكل صف
  */
 @Composable
 fun KeyboardPreview(theme: ThemeData) {
@@ -31,164 +34,84 @@ fun KeyboardPreview(theme: ThemeData) {
     val onPrimary = ColorUtils.parseColor(theme.onPrimary)
     val outline = ColorUtils.parseColor(theme.outline)
 
-    val radius = (theme.roundedness * 8).dp
-    val keyRadius = (theme.roundedness * 12).dp
+    val radius = (theme.roundedness * 6).dp
+    val keyRadius = (theme.roundedness * 10).dp
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(bg, RoundedCornerShape(radius))
-            .padding(8.dp),
+            .background(kbSurface, RoundedCornerShape(radius))
+            .padding(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // ═══════ صف الأرقام ═══════
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "0").forEach { num ->
-                PreviewKey(
-                    text = num,
-                    theme = theme,
-                    bgColor = kbContainer,
-                    textColor = onKbContainer,
-                    outline = outline,
-                    radius = keyRadius,
-                )
+        Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+            listOf("1","2","3","4","5","6","7","8","9","0").forEach { num ->
+                PreviewKey(num, theme, kbContainer, onKbContainer, outline, keyRadius)
             }
         }
+        Spacer(Modifier.height(4.dp))
 
-        Spacer(modifier = Modifier.height(6.dp))
-
-        // ═══════ صف QWERTY ═══════
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            listOf("Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P").forEach { letter ->
-                PreviewKey(
-                    text = letter,
-                    theme = theme,
-                    bgColor = kbContainer,
-                    textColor = onKbContainer,
-                    outline = outline,
-                    radius = keyRadius,
-                )
+        // ═══════ QWERTY ═══════
+        Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+            listOf("Q","W","E","R","T","Y","U","I","O","P").forEach { l ->
+                PreviewKey(l, theme, kbContainer, onKbContainer, outline, keyRadius)
             }
         }
+        Spacer(Modifier.height(4.dp))
 
-        Spacer(modifier = Modifier.height(6.dp))
-
-        // ═══════ صف ASDF ═══════
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            listOf("A", "S", "D", "F", "G", "H", "J", "K", "L").forEach { letter ->
-                PreviewKey(
-                    text = letter,
-                    theme = theme,
-                    bgColor = kbContainer,
-                    textColor = onKbContainer,
-                    outline = outline,
-                    radius = keyRadius,
-                )
+        // ═══════ ASDF ═══════
+        Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+            listOf("A","S","D","F","G","H","J","K","L").forEach { l ->
+                PreviewKey(l, theme, kbContainer, onKbContainer, outline, keyRadius)
             }
         }
+        Spacer(Modifier.height(4.dp))
 
-        Spacer(modifier = Modifier.height(6.dp))
-
-        // ═══════ صف ZXCV + Shift ═══════
+        // ═══════ ZXCV + Shift + Backspace ═══════
         Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Shift (functional)
-            PreviewKey(
-                text = "⇧",
-                theme = theme,
-                bgColor = kbVariant,
-                textColor = onKbContainer,
-                outline = outline,
-                radius = keyRadius,
-                width = 42.dp
-            )
-            listOf("Z", "X", "C", "V", "B", "N", "M").forEach { letter ->
-                PreviewKey(
-                    text = letter,
-                    theme = theme,
-                    bgColor = kbContainer,
-                    textColor = onKbContainer,
-                    outline = outline,
-                    radius = keyRadius,
-                )
+            PreviewKey("⇧", theme, kbVariant, onKbContainer, outline, keyRadius, width = 38.dp)
+            listOf("Z","X","C","V","B","N","M").forEach { l ->
+                PreviewKey(l, theme, kbContainer, onKbContainer, outline, keyRadius)
             }
-            // Backspace
-            PreviewKey(
-                text = "⌫",
-                theme = theme,
-                bgColor = kbContainer,
-                textColor = onKbContainer,
-                outline = outline,
-                radius = keyRadius,
-                width = 42.dp
-            )
+            PreviewKey("⌫", theme, kbVariant, onKbContainer, outline, keyRadius, width = 38.dp)
         }
+        Spacer(Modifier.height(4.dp))
 
-        Spacer(modifier = Modifier.height(6.dp))
-
-        // ═══════ صف سفلي ═══════
+        // ═══════ الصف السفلي ═══════
         Row(
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(3.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // ?123
-            PreviewKey(
-                text = "?123",
-                theme = theme,
-                bgColor = kbContainer,
-                textColor = onKbContainer,
-                outline = outline,
-                radius = keyRadius,
-                width = 42.dp
-            )
+            PreviewKey("?123", theme, kbVariant, onKbContainer, outline, keyRadius, width = 40.dp)
             // Emoji
-            PreviewKey(
-                text = "😊",
-                theme = theme,
-                bgColor = kbContainer,
-                textColor = onKbContainer,
-                outline = outline,
-                radius = keyRadius,
-                width = 42.dp
-            )
-            // Space
+            PreviewKey("😊", theme, kbVariant, onKbContainer, outline, keyRadius, width = 40.dp)
+            // Spacebar
             Box(
                 modifier = Modifier
                     .width(120.dp)
-                    .height(42.dp)
+                    .height(38.dp)
                     .clip(RoundedCornerShape(keyRadius))
                     .background(kbContainer)
-                    .border(1.dp, outline.copy(alpha = 0.3f), RoundedCornerShape(keyRadius)),
+                    .then(
+                        if (theme.autoBorders)
+                            Modifier.border(1.dp, outline.copy(alpha=0.4f), RoundedCornerShape(keyRadius))
+                        else Modifier
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    "Arabic",
-                    fontSize = (12 * theme.scaleText).sp,
-                    color = onKbContainer.copy(alpha = 0.7f)
-                )
+                Text("Arabic",
+                    fontSize = (11 * theme.scaleText).sp,
+                    color = onKbContainer.copy(alpha = 0.7f))
             }
-            // . 
-            PreviewKey(
-                text = ".",
-                theme = theme,
-                bgColor = kbContainer,
-                textColor = onKbContainer,
-                outline = outline,
-                radius = keyRadius,
-                width = 42.dp
-            )
-            // Enter (Action)
-            PreviewKey(
-                text = "↵",
-                theme = theme,
-                bgColor = primary,
-                textColor = onPrimary,
-                outline = outline,
-                radius = keyRadius,
-                width = 42.dp
-            )
+            // .
+            PreviewKey(".", theme, kbContainer, onKbContainer, outline, keyRadius, width = 30.dp)
+            // Enter
+            PreviewKey("↵", theme, primary, onPrimary, outline, keyRadius, width = 44.dp)
         }
     }
 }
@@ -203,26 +126,29 @@ private fun PreviewKey(
     radius: androidx.compose.ui.unit.Dp,
     width: androidx.compose.ui.unit.Dp = 30.dp,
 ) {
+    val interaction = remember { MutableInteractionSource() }
+    val isPressed by interaction.collectIsPressedAsState()
+    val kbPress = ColorUtils.parseColor(theme.keyboardPress)
+
+    val effectiveBg = if (isPressed) kbPress else bgColor
+
     Box(
         modifier = Modifier
             .width(width)
-            .height(42.dp)
+            .height(38.dp)
             .clip(RoundedCornerShape(radius))
-            .background(bgColor)
+            .background(effectiveBg)
             .then(
-                if (theme.autoBorders) {
-                    Modifier.border(1.dp, outline.copy(alpha = 0.4f), RoundedCornerShape(radius))
-                } else {
-                    Modifier
-                }
-            ),
+                if (theme.autoBorders)
+                    Modifier.border(1.dp, outline.copy(alpha=0.4f), RoundedCornerShape(radius))
+                else Modifier
+            )
+            .clickable(interactionSource = interaction, indication = null) {},
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text,
-            fontSize = (14 * theme.scaleText).sp,
-            fontWeight = FontWeight(theme.weightText.toInt()),
-            color = textColor
-        )
+        Text(text,
+            fontSize = (13 * theme.scaleText).sp,
+            fontWeight = FontWeight(theme.weightText.toInt().coerceIn(100, 900)),
+            color = textColor)
     }
 }

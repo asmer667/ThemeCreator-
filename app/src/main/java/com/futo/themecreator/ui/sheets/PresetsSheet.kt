@@ -24,21 +24,22 @@ fun PresetsSheet() {
     val tabs = listOf("🎨 أحادية", "🌈 متدرجة")
 
     Column(Modifier.fillMaxWidth()) {
-        Text("✨ ألوان جاهزة", style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold, modifier = Modifier.padding(16.dp))
-        Text("اختر لوناً ليُطبق فوراً على الكيبورد",
+        Text("✨ ألوان جاهزة",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(16.dp))
+        Text("اضغط على أي لون ليُطبق فوراً",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 16.dp))
         Spacer(Modifier.height(8.dp))
 
         TabRow(selectedTabIndex = selectedTab) {
-            tabs.forEachIndexed { i, title ->
+            tabs.forEachIndexed { i, t ->
                 Tab(selected = selectedTab == i, onClick = { selectedTab = i },
-                    text = { Text(title) })
+                    text = { Text(t) })
             }
         }
-
         Spacer(Modifier.height(8.dp))
 
         if (selectedTab == 0) SolidTab() else GradientTab()
@@ -54,8 +55,8 @@ private fun SolidTab() {
     Column {
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(selected = dark, onClick = { dark = true }, label = { Text("🌙 داكن") })
-            FilterChip(selected = !dark, onClick = { dark = false }, label = { Text("☀️ فاتح") })
+            FilterChip(selected = dark, onClick = { dark = true }, label = { Text("🌙 داكنة") })
+            FilterChip(selected = !dark, onClick = { dark = false }, label = { Text("☀️ فاتحة") })
         }
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -64,7 +65,7 @@ private fun SolidTab() {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(list) { preset -> SolidPresetCard(preset, dark) }
+            items(list) { preset -> SolidCard(preset, dark) }
         }
     }
 }
@@ -77,8 +78,8 @@ private fun GradientTab() {
     Column {
         Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilterChip(selected = dark, onClick = { dark = true }, label = { Text("🌙 داكن") })
-            FilterChip(selected = !dark, onClick = { dark = false }, label = { Text("☀️ فاتح") })
+            FilterChip(selected = dark, onClick = { dark = true }, label = { Text("🌙 داكنة") })
+            FilterChip(selected = !dark, onClick = { dark = false }, label = { Text("☀️ فاتحة") })
         }
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -87,47 +88,51 @@ private fun GradientTab() {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(list) { preset -> GradientPresetCard(preset, dark) }
+            items(list) { preset -> GradientCard(preset, dark) }
         }
     }
 }
 
 @Composable
-private fun SolidPresetCard(preset: SolidPreset, dark: Boolean) {
+private fun SolidCard(preset: SolidPreset, dark: Boolean) {
     val accent = ColorUtils.parseColor(preset.accent)
     val bg = ColorUtils.parseColor(preset.bg)
     val onBg = if (dark) Color.White else Color.Black
+
     Card(
         onClick = { PresetApplier.applySolid(preset, dark) },
-        modifier = Modifier.fillMaxWidth().height(90.dp),
+        modifier = Modifier.fillMaxWidth().height(85.dp),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = bg)
     ) {
         Column(Modifier.fillMaxSize().padding(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(preset.emoji, style = MaterialTheme.typography.titleLarge)
-                Spacer(Modifier.width(6.dp))
-                Text(preset.name, style = MaterialTheme.typography.bodyMedium,
+                Text(preset.emoji, style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.width(4.dp))
+                Text(preset.name, style = MaterialTheme.typography.labelMedium,
                     color = onBg, fontWeight = FontWeight.Bold, maxLines = 1)
             }
             Spacer(Modifier.weight(1f))
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Box(Modifier.size(20.dp).clip(RoundedCornerShape(6.dp)).background(accent))
-                Box(Modifier.size(20.dp).clip(RoundedCornerShape(6.dp))
+                Box(Modifier.size(18.dp).clip(RoundedCornerShape(5.dp)).background(accent))
+                Box(Modifier.size(18.dp).clip(RoundedCornerShape(5.dp))
                     .background(ColorUtils.parseColor(preset.container)))
+                Box(Modifier.size(18.dp).clip(RoundedCornerShape(5.dp))
+                    .background(ColorUtils.parseColor(preset.surface)))
             }
         }
     }
 }
 
 @Composable
-private fun GradientPresetCard(preset: GradientPreset, dark: Boolean) {
+private fun GradientCard(preset: GradientPreset, dark: Boolean) {
     val c1 = ColorUtils.parseColor(preset.color1)
     val c2 = ColorUtils.parseColor(preset.color2)
     val onBg = if (dark) Color.White else Color.Black
+
     Card(
         onClick = { PresetApplier.applyGradient(preset, dark) },
-        modifier = Modifier.fillMaxWidth().height(90.dp),
+        modifier = Modifier.fillMaxWidth().height(85.dp),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = ColorUtils.parseColor(preset.bg))
     ) {
@@ -135,14 +140,13 @@ private fun GradientPresetCard(preset: GradientPreset, dark: Boolean) {
             Brush.horizontalGradient(listOf(c1.copy(alpha=0.3f), c2.copy(alpha=0.3f))))) {
             Column(Modifier.fillMaxSize().padding(10.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(preset.emoji, style = MaterialTheme.typography.titleLarge)
-                    Spacer(Modifier.width(6.dp))
-                    Text(preset.name, style = MaterialTheme.typography.bodyMedium,
+                    Text(preset.emoji, style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.width(4.dp))
+                    Text(preset.name, style = MaterialTheme.typography.labelMedium,
                         color = onBg, fontWeight = FontWeight.Bold, maxLines = 1)
                 }
                 Spacer(Modifier.weight(1f))
-                Box(Modifier.fillMaxWidth().height(6.dp)
-                    .clip(RoundedCornerShape(3.dp))
+                Box(Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(3.dp))
                     .background(Brush.horizontalGradient(listOf(c1, c2))))
             }
         }
