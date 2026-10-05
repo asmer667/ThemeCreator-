@@ -4,40 +4,115 @@ import android.graphics.*
 import java.io.ByteArrayOutputStream
 
 /**
- * يولّد أشكال هندسية 3D (توحي بالضغط)
+ * مولّد الأشكال — 686 شكلًا هندسيًا + 3D
+ * العائلات: polygon, star, rounded, ellipse, flower, gear, cross,
+ *           heart, shield, arrow, blob, capsule, diamond, teardrop,
+ *           wave, cloud + نسخ 3D
  */
 object ShapesGenerator {
 
     const val SIZE = 256
 
-    val shapes = listOf(
-        ShapeDef("square", "مربع", "▢"),
-        ShapeDef("rounded", "دائري", "◯"),
-        ShapeDef("circle", "دائرة", "⬤"),
-        ShapeDef("hexagon", "سداسي", "⬡"),
-        ShapeDef("diamond", "معيّن", "◆"),
-        ShapeDef("star", "نجمة", "★"),
-        ShapeDef("triangle", "مثلث", "▲"),
-        ShapeDef("pentagon", "خماسي", "⬟"),
-        ShapeDef("octagon", "ثماني", "⯃"),
-        ShapeDef("shield", "درع", "🛡"),
-        ShapeDef("capsule", "كبسولة", "▬"),
-        ShapeDef("3d_bubble", "فقاعة 3D", "◉"),
-        ShapeDef("3d_glass", "زجاج 3D", "◈"),
-        ShapeDef("3d_neon", "نيون 3D", "✦"),
-        ShapeDef("3d_metal", "معدن 3D", "⬢"),
-        ShapeDef("3d_soft", "ناعم 3D", "◍"),
-    )
+    val shapes: List<ShapeDef> = buildShapes()
 
-    /**
-     * يولّد PNG 3D للشكل المطلوب مع تطبيق الدوران والحدة والميل.
-     *
-     * @param shapeId معرّف الشكل
-     * @param fillColor لون التعبئة (ARGB)
-     * @param rotation زاوية الدوران بالدرجات (0..360)
-     * @param sharpness حِدّة الزوايا: 0 = حاد جدًا، 1 = دائري جدًا
-     * @param tilt الميل بالدرجات (-45..45)
-     */
+    private fun buildShapes(): List<ShapeDef> = buildList {
+
+        // ─── 1. مضلعات منتظمة (3..40 ضلعًا) = 38
+        for (n in 3..40) add(ShapeDef("poly$n", "مضلع $n", polygonEmoji(n), "polygon", n.toFloat()))
+
+        // ─── 2. نجوم (5..30 رأسًا × 5 نسب داخلية) = 130
+        for (pts in 5..30) for (ir in listOf(0.25f, 0.35f, 0.45f, 0.55f, 0.70f))
+            add(ShapeDef("star${pts}_${(ir * 100).toInt()}", "نجمة $pts", "★", "star", pts.toFloat(), ir))
+
+        // ─── 3. مستطيلات مستديرة (20 درجة) = 20
+        for (i in 0..19) {
+            val r = i / 19f
+            add(ShapeDef("rrect$i", "مستدير $i", "▢", "rounded", r))
+        }
+
+        // ─── 4. بيضاويات (12 نسبة) = 12
+        for (i in 0..11) {
+            val ratio = 0.40f + i * 0.1f
+            add(ShapeDef("ellipse$i", "بيضاوي $i", "⬭", "ellipse", ratio))
+        }
+
+        // ─── 5. زهور (5..24 بتلة × 4 أعماق) = 80
+        for (pt in 5..24) for (d in listOf(0.25f, 0.40f, 0.55f, 0.70f))
+            add(ShapeDef("flower${pt}_${(d * 100).toInt()}", "زهرة $pt", "✿", "flower", pt.toFloat(), d))
+
+        // ─── 6. تروس (6..36 سنًا × 3 أعماق) = 93
+        for (t in 6..36) for (d in listOf(0.12f, 0.20f, 0.28f))
+            add(ShapeDef("gear${t}_${(d * 100).toInt()}", "ترس $t", "⚙", "gear", t.toFloat(), d))
+
+        // ─── 7. صلبان (10 سماكات) = 10
+        for (i in 0..9) {
+            val th = 0.20f + i * 0.06f
+            add(ShapeDef("cross$i", "صليب $i", "✚", "cross", th))
+        }
+
+        // ─── 8. قلوب (15 درجة حدّة) = 15
+        for (i in 0..14) {
+            val p = i / 14f
+            add(ShapeDef("heart$i", "قلب $i", "♥", "heart", p))
+        }
+
+        // ─── 9. دروع (عرض × حدّة × 6×3) = 18
+        for (i in 0..5) for (pi in 0..2) {
+            val w = 0.40f + i * 0.12f
+            add(ShapeDef("shield${i}_$pi", "درع $i$pi", "🛡", "shield", w, pi / 2f))
+        }
+
+        // ─── 10. أسهم (اتجاه × سماكة × 4×10) = 40
+        for (dir in 0..3) for (i in 0..9) {
+            val th = 0.15f + i * 0.08f
+            add(ShapeDef("arrow${dir}_$i", "سهم $dir-$i", "➤", "arrow", dir.toFloat(), th))
+        }
+
+        // ─── 11. فقاعات (بذرة × سعة × 5×12) = 60
+        for (seed in 0..4) for (i in 0..11) {
+            val amp = i / 11f
+            add(ShapeDef("blob${seed}_${i}", "فقاعة $seed-$i", "◍", "blob", seed.toFloat(), amp))
+        }
+
+        // ─── 12. كبسولات (10 نسب) = 10
+        for (i in 0..9) {
+            val r = 0.25f + i * 0.08f
+            add(ShapeDef("capsule$i", "كبسولة $i", "▬", "capsule", r))
+        }
+
+        // ─── 13. معيّنات (12 درجة استدارة) = 12
+        for (i in 0..11) {
+            val r = i / 11f
+            add(ShapeDef("diamond$i", "معيّن $i", "◆", "diamond", r))
+        }
+
+        // ─── 14. قطرات (15 حدّة) = 15
+        for (i in 0..14) {
+            val p = i / 14f
+            add(ShapeDef("teardrop$i", "قطرة $i", "💧", "teardrop", p))
+        }
+
+        // ─── 15. أمواج (15 سعة) = 15
+        for (i in 0..14) {
+            val a = i / 14f
+            add(ShapeDef("wave$i", "موجة $i", "〜", "wave", a))
+        }
+
+        // ─── 16. سحابات (9 نتوءات × 2 نمط) = 18
+        for (b in 4..12) for (v in 0..1)
+            add(ShapeDef("cloud${b}_$v", "سحابة $b-$v", "☁", "cloud", b.toFloat(), v.toFloat()))
+
+        // ─── 17. نسخ 3D لأول 100 شكل = 100
+        val first100 = take(100).toList()
+        for (base in first100)
+            add(base.copy(id = "3d_${base.id}", name = "3D ${base.name}"))
+    }
+
+    private fun polygonEmoji(n: Int): String = when (n) {
+        3 -> "△"; 4 -> "▢"; 5 -> "⬟"; 6 -> "⬡"; 7 -> "◈"; 8 -> "⯃"; 9 -> "⬢"; 10 -> "⬢"
+        else -> "●"
+    }
+
     fun generate3DPNG(
         shapeId: String,
         fillColor: Int,
@@ -47,15 +122,17 @@ object ShapesGenerator {
         highlightAlpha: Int = 120,
         shadowAlpha: Int = 90,
     ): ByteArray {
+        val def = shapes.find { it.id == shapeId } ?: shapes.first()
+        val is3D = def.id.startsWith("3d_")
+
         val bmp = Bitmap.createBitmap(SIZE, SIZE, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bmp)
         canvas.drawColor(Color.TRANSPARENT)
 
-        val path = buildPath(shapeId, sharpness)
+        val path = buildPath(def, sharpness)
         val bounds = RectF()
         path.computeBounds(bounds, true)
 
-        // ─── تطبيق التحويلات (دوران + ميل) ───
         canvas.save()
         if (rotation != 0f || tilt != 0f) {
             val m = Matrix()
@@ -69,68 +146,66 @@ object ShapesGenerator {
             canvas.concat(m)
         }
 
-        // 1. الظل الخارجي
-        val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.argb(shadowAlpha, 0, 0, 0)
-            setShadowLayer(12f, 0f, 6f, Color.argb(shadowAlpha, 0, 0, 0))
+        // 1. ظل
+        if (is3D) {
+            val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.argb(shadowAlpha, 0, 0, 0)
+                setShadowLayer(14f, 0f, 8f, Color.argb(shadowAlpha, 0, 0, 0))
+            }
+            canvas.drawPath(path, shadowPaint)
         }
-        canvas.drawPath(path, shadowPaint)
 
-        // 2. التدرج الأساسي (Linear 3D)
+        // 2. تعبئة متدرجة
         val gradientPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             shader = LinearGradient(
                 0f, 0f, 0f, SIZE.toFloat(),
-                intArrayOf(
-                    lighten(fillColor, 0.35f),
-                    fillColor,
-                    darken(fillColor, 0.25f),
-                ),
+                intArrayOf(lighten(fillColor, 0.35f), fillColor, darken(fillColor, 0.25f)),
                 floatArrayOf(0f, 0.5f, 1f),
                 Shader.TileMode.CLAMP
             )
         }
         canvas.drawPath(path, gradientPaint)
 
-        // 3. اللمعة العلوية
-        val highlightPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            shader = LinearGradient(
-                0f, 0f, 0f, bounds.height() * 0.5f,
-                intArrayOf(
-                    Color.argb(highlightAlpha, 255, 255, 255),
-                    Color.TRANSPARENT,
-                ),
-                null,
-                Shader.TileMode.CLAMP
-            )
+        // 3. لمعة علوية
+        if (is3D) {
+            val hl = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                shader = LinearGradient(
+                    0f, 0f, 0f, bounds.height() * 0.5f,
+                    intArrayOf(Color.argb(highlightAlpha, 255, 255, 255), Color.TRANSPARENT),
+                    null, Shader.TileMode.CLAMP
+                )
+            }
+            canvas.save()
+            canvas.clipPath(path)
+            canvas.drawRect(0f, 0f, SIZE.toFloat(), bounds.height() * 0.5f, hl)
+            canvas.restore()
         }
-        canvas.save()
-        canvas.clipPath(path)
-        canvas.drawRect(0f, 0f, SIZE.toFloat(), bounds.height() * 0.5f, highlightPaint)
-        canvas.restore()
 
-        // 4. الحدود
+        // 4. حدود
         val outlinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
-            strokeWidth = 4f
+            strokeWidth = if (is3D) 5f else 3f
             color = darken(fillColor, 0.45f)
         }
         canvas.drawPath(path, outlinePaint)
 
-        // 5. حد داخلي فاتح
-        val innerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            strokeWidth = 2f
-            color = Color.argb(120, 255, 255, 255)
+        // 5. حد داخلي
+        if (is3D) {
+            val innerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.STROKE
+                strokeWidth = 2f
+                color = Color.argb(120, 255, 255, 255)
+            }
+            canvas.save()
+            val inset = Path(path)
+            val m = Matrix()
+            m.setScale(0.92f, 0.92f, SIZE / 2f, SIZE / 2f)
+            inset.transform(m)
+            canvas.drawPath(inset, innerPaint)
+            canvas.restore()
         }
-        canvas.save()
-        val insetPath = Path(path)
-        val matrix = Matrix()
-        matrix.setScale(0.92f, 0.92f, SIZE / 2f, SIZE / 2f)
-        insetPath.transform(matrix)
-        canvas.drawPath(insetPath, innerPaint)
-        canvas.restore()
 
-        canvas.restore() // استرجاع تحويلات الدوران
+        canvas.restore()
 
         val out = ByteArrayOutputStream()
         bmp.compress(Bitmap.CompressFormat.PNG, 100, out)
@@ -138,55 +213,46 @@ object ShapesGenerator {
         return out.toByteArray()
     }
 
-    private fun buildPath(id: String, sharpness: Float): Path {
+    private fun buildPath(def: ShapeDef, sharpness: Float): Path {
         val p = Path()
         val cx = SIZE / 2f
         val cy = SIZE / 2f
         val r = SIZE / 2f - 16f
         val s = sharpness.coerceIn(0f, 1f)
 
-        when (id) {
-            "square" -> {
-                val cr = (4f + s * (r * 0.4f)).coerceAtLeast(2f)
+        when (def.family) {
+            "polygon"  -> regularPolygon(p, cx, cy, r, def.p1.toInt())
+            "star"     -> star(p, cx, cy, r, r * def.p2, def.p1.toInt())
+            "rounded"  -> {
+                val cr = r * (0.02f + def.p1 * 0.98f)
                 p.addRoundRect(RectF(16f, 16f, SIZE - 16f, SIZE - 16f), cr, cr, Path.Direction.CW)
             }
-            "rounded" -> {
-                val cr = r * (0.2f + s * 0.7f)
-                p.addRoundRect(RectF(16f, 16f, SIZE - 16f, SIZE - 16f), cr, cr, Path.Direction.CW)
+            "ellipse"  -> {
+                val rx = r * def.p1
+                val ry = r / def.p1
+                p.addOval(RectF(cx - rx, cy - ry, cx + rx, cy + ry), Path.Direction.CW)
             }
-            "circle", "3d_bubble" -> p.addCircle(cx, cy, r, Path.Direction.CW)
-            "capsule" -> p.addRoundRect(
-                RectF(16f, cy - r * 0.5f, SIZE - 16f, cy + r * 0.5f),
-                r * 0.5f, r * 0.5f, Path.Direction.CW
-            )
-            "hexagon", "3d_metal" -> regularPolygon(p, cx, cy, r, 6)
-            "pentagon" -> regularPolygon(p, cx, cy, r, 5)
-            "octagon" -> regularPolygon(p, cx, cy, r, 8)
-            "triangle" -> {
-                p.moveTo(cx, 16f); p.lineTo(SIZE - 16f, SIZE - 16f)
-                p.lineTo(16f, SIZE - 16f); p.close()
+            "flower"   -> flower(p, cx, cy, r, def.p1.toInt(), def.p2)
+            "gear"     -> gear(p, cx, cy, r, def.p1.toInt(), def.p2)
+            "cross"    -> cross(p, cx, cy, r, def.p1)
+            "heart"    -> heart(p, cx, cy, r, def.p1)
+            "shield"   -> shield(p, cx, cy, r, def.p1, def.p2)
+            "arrow"    -> arrow(p, cx, cy, r, def.p1.toInt(), def.p2)
+            "blob"     -> blob(p, cx, cy, r, def.p1.toInt(), def.p2)
+            "capsule"  -> {
+                val h = r * def.p1
+                p.addRoundRect(RectF(16f, cy - h, SIZE - 16f, cy + h), h, h, Path.Direction.CW)
             }
-            "diamond", "3d_glass" -> {
-                p.moveTo(cx, 16f); p.lineTo(SIZE - 16f, cy)
-                p.lineTo(cx, SIZE - 16f); p.lineTo(16f, cy); p.close()
-            }
-            "star", "3d_neon" -> star(p, cx, cy, r, r * 0.45f, 5)
-            "shield" -> {
-                p.moveTo(cx, 16f)
-                p.lineTo(SIZE - 24f, 60f)
-                p.lineTo(SIZE - 24f, cy + 20f)
-                p.quadTo(SIZE - 24f, SIZE - 16f, cx, SIZE - 16f)
-                p.quadTo(24f, SIZE - 16f, 24f, cy + 20f)
-                p.lineTo(24f, 60f)
-                p.close()
-            }
-            else -> {
-                val cr = (10f + s * (r * 0.6f)).coerceAtLeast(4f)
-                p.addRoundRect(RectF(16f, 16f, SIZE - 16f, SIZE - 16f), cr, cr, Path.Direction.CW)
-            }
+            "diamond"  -> diamond(p, cx, cy, r, def.p1)
+            "teardrop" -> teardrop(p, cx, cy, r, def.p1)
+            "wave"     -> wave(p, cx, cy, r, def.p1)
+            "cloud"    -> cloud(p, cx, cy, r, def.p1.toInt(), def.p2 > 0.5f)
+            else -> p.addRoundRect(RectF(16f, 16f, SIZE - 16f, SIZE - 16f), 40f, 40f, Path.Direction.CW)
         }
         return p
     }
+
+    // ═══════════ العائلات ═══════════
 
     private fun regularPolygon(p: Path, cx: Float, cy: Float, r: Float, sides: Int) {
         for (i in 0 until sides) {
@@ -209,6 +275,187 @@ object ShapesGenerator {
         p.close()
     }
 
+    private fun flower(p: Path, cx: Float, cy: Float, r: Float, petals: Int, depth: Float) {
+        val steps = petals * 20
+        for (i in 0 until steps) {
+            val angle = 2.0 * Math.PI * i / steps
+            val petalPhase = Math.cos(petals * angle)
+            val radius = r * (1f - depth + depth * petalPhase.toFloat())
+            val x = cx + radius * Math.cos(angle).toFloat()
+            val y = cy + radius * Math.sin(angle).toFloat()
+            if (i == 0) p.moveTo(x, y) else p.lineTo(x, y)
+        }
+        p.close()
+    }
+
+    private fun gear(p: Path, cx: Float, cy: Float, r: Float, teeth: Int, depth: Float) {
+        val steps = teeth * 4
+        for (i in 0 until steps) {
+            val angle = 2.0 * Math.PI * i / steps
+            val phase = i % 4
+            val radius = when (phase) {
+                0, 1 -> r
+                2, 3 -> r * (1f - depth)
+                else -> r
+            }
+            val x = cx + radius * Math.cos(angle).toFloat()
+            val y = cy + radius * Math.sin(angle).toFloat()
+            if (i == 0) p.moveTo(x, y) else p.lineTo(x, y)
+        }
+        p.close()
+    }
+
+    private fun cross(p: Path, cx: Float, cy: Float, r: Float, thickness: Float) {
+        val arm = r * 0.5f * thickness * 2f
+        val w = r * thickness
+        p.moveTo(cx - w, cy - r)
+        p.lineTo(cx + w, cy - r)
+        p.lineTo(cx + w, cy - w)
+        p.lineTo(cx + r, cy - w)
+        p.lineTo(cx + r, cy + w)
+        p.lineTo(cx + w, cy + w)
+        p.lineTo(cx + w, cy + r)
+        p.lineTo(cx - w, cy + r)
+        p.lineTo(cx - w, cy + w)
+        p.lineTo(cx - r, cy + w)
+        p.lineTo(cx - r, cy - w)
+        p.lineTo(cx - w, cy - w)
+        p.close()
+    }
+
+    private fun heart(p: Path, cx: Float, cy: Float, r: Float, sharpness: Float) {
+        val topY = cy - r * 0.6f
+        val dipY = cy - r * (0.3f - sharpness * 0.3f)
+        val bottomY = cy + r
+
+        p.moveTo(cx, dipY)
+        p.cubicTo(
+            cx - r * 1.2f, cy - r * 1.4f,
+            cx - r * 1.2f, cy + r * 0.2f,
+            cx, bottomY
+        )
+        p.cubicTo(
+            cx + r * 1.2f, cy + r * 0.2f,
+            cx + r * 1.2f, cy - r * 1.4f,
+            cx, dipY
+        )
+        p.close()
+    }
+
+    private fun shield(p: Path, cx: Float, cy: Float, r: Float, width: Float, pointiness: Float) {
+        val w = r * width
+        val top = cy - r
+        val bot = cy + r
+        p.moveTo(cx - w, top)
+        p.lineTo(cx + w, top)
+        p.lineTo(cx + w, cy + r * (0.2f + pointiness * 0.3f))
+        p.quadTo(cx + w, bot - (1f - pointiness) * r * 0.2f, cx, bot)
+        p.quadTo(cx - w, bot - (1f - pointiness) * r * 0.2f, cx - w, cy + r * (0.2f + pointiness * 0.3f))
+        p.close()
+    }
+
+    private fun arrow(p: Path, cx: Float, cy: Float, r: Float, dir: Int, thickness: Float) {
+        val w = r * thickness
+        when (dir) {
+            0 -> { // →
+                p.moveTo(cx - r, cy - w); p.lineTo(cx + r * 0.2f, cy - w)
+                p.lineTo(cx + r * 0.2f, cy - w * 2f); p.lineTo(cx + r, cy)
+                p.lineTo(cx + r * 0.2f, cy + w * 2f); p.lineTo(cx + r * 0.2f, cy + w)
+                p.lineTo(cx - r, cy + w); p.close()
+            }
+            1 -> { // ←
+                p.moveTo(cx + r, cy - w); p.lineTo(cx - r * 0.2f, cy - w)
+                p.lineTo(cx - r * 0.2f, cy - w * 2f); p.lineTo(cx - r, cy)
+                p.lineTo(cx - r * 0.2f, cy + w * 2f); p.lineTo(cx - r * 0.2f, cy + w)
+                p.lineTo(cx + r, cy + w); p.close()
+            }
+            2 -> { // ↑
+                p.moveTo(cx - w, cy + r); p.lineTo(cx - w, cy - r * 0.2f)
+                p.lineTo(cx - w * 2f, cy - r * 0.2f); p.lineTo(cx, cy - r)
+                p.lineTo(cx + w * 2f, cy - r * 0.2f); p.lineTo(cx + w, cy - r * 0.2f)
+                p.lineTo(cx + w, cy + r); p.close()
+            }
+            3 -> { // ↓
+                p.moveTo(cx - w, cy - r); p.lineTo(cx - w, cy + r * 0.2f)
+                p.lineTo(cx - w * 2f, cy + r * 0.2f); p.lineTo(cx, cy + r)
+                p.lineTo(cx + w * 2f, cy + r * 0.2f); p.lineTo(cx + w, cy + r * 0.2f)
+                p.lineTo(cx + w, cy - r); p.close()
+            }
+        }
+    }
+
+    private fun blob(p: Path, cx: Float, cy: Float, r: Float, seed: Int, amp: Float) {
+        val steps = 64
+        val phase1 = seed * 1.3f
+        val phase2 = seed * 2.1f
+        for (i in 0 until steps) {
+            val a = 2.0 * Math.PI * i / steps
+            val noise = (Math.sin(3 * a + phase1).toFloat() * 0.5f +
+                         Math.sin(5 * a + phase2).toFloat() * 0.3f +
+                         Math.sin(7 * a).toFloat() * 0.2f)
+            val radius = r * (1f + amp * noise)
+            val x = cx + radius * Math.cos(a).toFloat()
+            val y = cy + radius * Math.sin(a).toFloat()
+            if (i == 0) p.moveTo(x, y) else p.lineTo(x, y)
+        }
+        p.close()
+    }
+
+    private fun diamond(p: Path, cx: Float, cy: Float, r: Float, roundness: Float) {
+        val cr = r * roundness * 0.4f
+        p.moveTo(cx, cy - r)
+        p.lineTo(cx + r - cr, cy - cr); p.quadTo(cx + r, cy, cx + r, cy + cr)
+        p.lineTo(cx + cr, cy + r - cr); p.quadTo(cx, cy + r, cx - cr, cy + r - cr)
+        p.lineTo(cx - r + cr, cy + cr); p.quadTo(cx - r, cy, cx - r, cy - cr)
+        p.lineTo(cx - cr, cy - r + cr); p.quadTo(cx, cy - r, cx, cy - r)
+        p.close()
+    }
+
+    private fun teardrop(p: Path, cx: Float, cy: Float, r: Float, pointiness: Float) {
+        val topY = cy - r - r * pointiness * 0.8f
+        val botY = cy + r
+        p.moveTo(cx, topY)
+        p.cubicTo(cx + r * 0.9f, cy - r * 0.5f, cx + r, cy + r * 0.5f, cx, botY)
+        p.cubicTo(cx - r, cy + r * 0.5f, cx - r * 0.9f, cy - r * 0.5f, cx, topY)
+        p.close()
+    }
+
+    private fun wave(p: Path, cx: Float, cy: Float, r: Float, amp: Float) {
+        val left = 16f
+        val right = SIZE - 16f
+        val top = cy - r * 0.6f
+        val bot = cy + r * 0.8f
+        p.moveTo(left, top)
+        val steps = 40
+        for (i in 0..steps) {
+            val x = left + (right - left) * i / steps
+            val y = top + amp * r * 0.4f * Math.sin(4.0 * Math.PI * i / steps).toFloat()
+            p.lineTo(x, y)
+        }
+        p.lineTo(right, bot); p.lineTo(left, bot); p.close()
+    }
+
+    private fun cloud(p: Path, cx: Float, cy: Float, r: Float, bumps: Int, variant: Boolean) {
+        val baseline = cy + r * 0.4f
+        val step = (2 * r) / bumps
+        if (variant) {
+            p.moveTo(cx - r, baseline)
+            for (i in 0 until bumps) {
+                val x = cx - r + step * (i + 0.5f)
+                val rad = step * (0.6f + (i % 3) * 0.15f)
+                p.addCircle(x, baseline - rad * 0.5f, rad, Path.Direction.CW)
+            }
+            p.addRect(cx - r, baseline - step * 0.3f, cx + r, baseline, Path.Direction.CW)
+        } else {
+            p.moveTo(cx - r, baseline)
+            for (i in 0 until bumps) {
+                val x = cx - r + step * i
+                val rad = step * (0.7f + (i % 2) * 0.2f)
+                p.addCircle(x, baseline - rad * 0.4f, rad, Path.Direction.CW)
+            }
+        }
+    }
+
     private fun lighten(color: Int, factor: Float): Int {
         val r = (Color.red(color) + (255 - Color.red(color)) * factor).toInt().coerceIn(0, 255)
         val g = (Color.green(color) + (255 - Color.green(color)) * factor).toInt().coerceIn(0, 255)
@@ -224,4 +471,11 @@ object ShapesGenerator {
     }
 }
 
-data class ShapeDef(val id: String, val name: String, val emoji: String)
+data class ShapeDef(
+    val id: String,
+    val name: String,
+    val emoji: String,
+    val family: String,
+    val p1: Float = 0f,
+    val p2: Float = 0f,
+)
