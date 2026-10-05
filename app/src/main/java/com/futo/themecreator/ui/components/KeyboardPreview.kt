@@ -39,12 +39,27 @@ fun loadFontFamily(fontName: String?): FontFamily? {
     return remember(fontName, ThemeState.fontsVersion) {
         if (fontName == null) return@remember null
         try {
-            val file = com.futo.themecreator.data.FontDownloader.fontFile(context, fontName)
-            if (file.exists() && file.length() > 1000) {
-                FontFamily(Font(file))
+            val bytes = FontDownloader.loadFontBytes(context, fontName)
+            if (bytes != null && bytes.size > 1000) {
+                FontFamily(Font(android.graphics.Typeface.createFromFile(
+                    saveTempFont(context, fontName, bytes)
+                )))
             } else null
         } catch (e: Exception) { null }
     }
+}
+
+/**
+ * يحفظ بايتات الخط مؤقتًا في cache لاستخدامها مع Font().
+ */
+private fun saveTempFont(context: android.content.Context, name: String, bytes: ByteArray): java.io.File {
+    val cacheDir = java.io.File(context.cacheDir, "fonts")
+    if (!cacheDir.exists()) cacheDir.mkdirs()
+    val f = java.io.File(cacheDir, name)
+    if (!f.exists() || f.length() != bytes.size.toLong()) {
+        f.writeBytes(bytes)
+    }
+    return f
 }
 
 @Composable

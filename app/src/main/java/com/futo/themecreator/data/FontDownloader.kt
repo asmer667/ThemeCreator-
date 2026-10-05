@@ -77,4 +77,42 @@ object FontDownloader {
             ?.filter { it.extension.lowercase() in setOf("ttf", "otf") }
             ?.map { it.name }
             ?: emptyList()
+
+    /**
+     * يقرأ بايتات الخط من المكانين:
+     *  1. filesDir/fonts/ (المحمَّلة)
+     *  2. assets/fonts/ (المضمّنة في APK)
+     * يُرجع null إن لم يُوجد.
+     */
+    fun loadFontBytes(context: Context, fileName: String): ByteArray? {
+        // 1. من filesDir
+        val file = fontFile(context, fileName)
+        if (file.exists() && file.length() > 1000) {
+            try {
+                return file.readBytes()
+            } catch (e: Exception) { e.printStackTrace() }
+        }
+        // 2. من assets
+        return try {
+            context.assets.open("fonts/$fileName").use { it.readBytes() }
+        } catch (e: Exception) {
+            try {
+                context.assets.open(fileName).use { it.readBytes() }
+            } catch (e2: Exception) { null }
+        }
+    }
+
+    /**
+     * يتحقق إن كان الخط موجودًا في أي من المكانين.
+     */
+    fun fontExists(context: Context, fileName: String): Boolean {
+        if (isDownloaded(context, fileName)) return true
+        return try {
+            context.assets.open("fonts/$fileName").use { true }
+        } catch (e: Exception) {
+            try {
+                context.assets.open(fileName).use { true }
+            } catch (e2: Exception) { false }
+        }
+    }
 }

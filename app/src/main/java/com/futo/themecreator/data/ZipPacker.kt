@@ -80,13 +80,7 @@ object ZipPacker {
 
         // ─── 4. تحميل الخط (إن وُجد) ───
         val fontBytes: ByteArray? = theme.fontName?.let { name ->
-            try {
-                context.assets.open("fonts/$name").use { it.readBytes() }
-            } catch (e: Exception) {
-                try {
-                    context.assets.open(name).use { it.readBytes() }
-                } catch (e2: Exception) { null }
-            }
+            FontDownloader.loadFontBytes(context, name)
         }
 
         // ─── 5. بناء ZIP ───
