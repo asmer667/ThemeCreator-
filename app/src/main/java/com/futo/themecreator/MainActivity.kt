@@ -3,56 +3,71 @@ package com.futo.themecreator
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.futo.themecreator.data.ThemeState
+import com.futo.themecreator.data.ThemeStorage
+import com.futo.themecreator.ui.screens.EditorScreen
+import com.futo.themecreator.ui.screens.HomeScreen
+import com.futo.themecreator.ui.screens.ThemeListScreen
 import com.futo.themecreator.ui.theme.ThemeCreatorTheme
-import com.futo.themecreator.ui.screens.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ThemeStorage.load(this)
         setContent {
             ThemeCreatorTheme {
-                AppNavigation()
-            }
-        }
-    }
-}
-
-@Composable
-fun AppNavigation() {
-    var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("الألوان", "الأشكال", "الأيقونات", "المعاينة", "التصدير")
-
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                tabs.forEachIndexed { index, label ->
-                    NavigationBarItem(
-                        selected = selectedTab == index,
-                        onClick = { selectedTab = index },
-                        icon = { Text("${index + 1}") },
-                        label = { Text(label) }
-                    )
+                val nav = rememberNavController()
+                NavHost(nav, startDestination = "home") {
+                    composable("home") {
+                        HomeScreen(
+                            onCreate = {
+                                val t = ThemeStorage.createNew(this@MainActivity)
+                                ThemeState.replace(t)
+                                ThemeState.icons = emptyMap()
+                                ThemeState.shapes3D = emptySet()
+                                nav.navigate("editor")
+                            },
+                            onEdit = { nav.navigate("list/edit") },
+                            onExport = { nav.navigate("list/export") },
+                        )
+                    }
+                    composable("list/edit") {
+                        ThemeListScreen(
+                            mode = ThemeListScreen.Mode.EDIT,
+                            onBack = { nav.popBackStack() },
+                            onSelect = { theme ->
+                                ThemeState.replace(theme)
+                                ThemeState.icons = emptyMap()
+                                ThemeState.shapes3D = emptySet()
+                                nav.navigate("editor")
+                            }
+                        )
+                    }
+                    composable("list/export") {
+                        ThemeListScreen(
+                            mode = ThemeListScreen.Mode.EXPORT,
+                            onBack = { nav.popBackStack() },
+                            onSelect = { theme ->
+                                ThemeState.replace(theme)
+                                ThemeState.icons = emptyMap()
+                                ThemeState.shapes3D = emptySet()
+                                nav.navigate("editor")
+                            }
+                        )
+                    }
+                    composable("editor") {
+                        EditorScreen(
+                            onBack = {
+                                ThemeStorage.save(this@MainActivity, ThemeState.theme)
+                                nav.popBackStack()
+                            }
+                        )
+                    }
                 }
-            }
-        }
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            when (selectedTab) {
-                0 -> ColorsScreen()
-                1 -> ShapesScreen()
-                2 -> IconsScreen()
-                3 -> PreviewScreen()
-                4 -> ExportScreen()
             }
         }
     }
