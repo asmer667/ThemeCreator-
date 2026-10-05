@@ -14,7 +14,7 @@ object ShapeCache {
         val key = "${group.name}_${config.shapeId}_${config.rotation}_${config.sharpness}_${config.tilt}_${fillColor}"
         cache[key]?.let { return it }
         return try {
-            val bytes = ShapeGenerator2.generate(config, fillColor, 0)
+            val bytes = ShapesGenerator.generate3DPNG(config.shapeId, fillColor)
             val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
             val img = bmp.asImageBitmap()
             cache[key] = img

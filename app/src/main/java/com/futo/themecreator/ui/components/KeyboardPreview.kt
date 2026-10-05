@@ -164,11 +164,14 @@ private fun PreviewKey(
         }
     }
 
+    val effectiveWidth = width * (groupShape?.widthScale ?: 1f)
+    val effectiveHeight = 40.dp * (groupShape?.heightScale ?: 1f)
+
     Box(
         Modifier
             .padding(horizontal = 2.dp)
-            .width(width)
-            .height(40.dp),
+            .width(effectiveWidth)
+            .height(effectiveHeight),
         contentAlignment = Alignment.Center
     ) {
         // ✅ الشكل الفعلي (إذا موجود)
@@ -214,7 +217,7 @@ private fun PreviewKey(
 }
 
 @Composable
-private fun SpacebarKey(
+private fun androidx.compose.foundation.layout.RowScope.SpacebarKey(
     theme: ThemeData,
     iconUri: android.net.Uri?,
     groupShape: ShapeConfig?,
@@ -230,8 +233,10 @@ private fun SpacebarKey(
         }
     }
 
+    val effectiveHeight = 40.dp * (groupShape?.heightScale ?: 1f)
+
     Box(
-        Modifier.weight(1f).height(40.dp),
+        Modifier.weight(1f).height(effectiveHeight),
         contentAlignment = Alignment.Center
     ) {
         if (shapeImage != null) {
