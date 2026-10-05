@@ -41,9 +41,8 @@ fun loadFontFamily(fontName: String?): FontFamily? {
         try {
             val bytes = FontDownloader.loadFontBytes(context, fontName)
             if (bytes != null && bytes.size > 1000) {
-                FontFamily(Font(android.graphics.Typeface.createFromFile(
-                    saveTempFont(context, fontName, bytes)
-                )))
+                val file = saveTempFont(context, fontName, bytes)
+                if (file.exists()) FontFamily(Font(file)) else null
             } else null
         } catch (e: Exception) { null }
     }
