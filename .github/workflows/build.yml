@@ -2,6 +2,8 @@ name: Build FUTO Theme Creator
 
 on:
   push:
+    branches: [ main, master, dev ]
+  pull_request:
     branches: [ main, master ]
   workflow_dispatch:
 
@@ -36,9 +38,11 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Upload APK
+      - name: Upload Debug APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: theme-creator-debug-apk
+          name: theme-creator-debug-apk-${{ github.sha }}
           path: app/build/outputs/apk/debug/*.apk
-          if-no-files-found: error
+          if-no-files-found: warn
+          retention-days: 14
