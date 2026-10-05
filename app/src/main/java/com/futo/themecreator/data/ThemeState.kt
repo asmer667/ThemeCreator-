@@ -15,7 +15,6 @@ object ThemeState {
 
     var icons by mutableStateOf<Map<String, Uri>>(emptyMap())
     var shapes3D by mutableStateOf<Set<String>>(emptySet())
-        private set
 
     /** تحديث حقل واحد في الثيم */
     fun update(field: String, value: String) {

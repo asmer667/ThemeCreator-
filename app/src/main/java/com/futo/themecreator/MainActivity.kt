@@ -11,6 +11,7 @@ import com.futo.themecreator.data.ThemeState
 import com.futo.themecreator.data.ThemeStorage
 import com.futo.themecreator.ui.screens.EditorScreen
 import com.futo.themecreator.ui.screens.HomeScreen
+import com.futo.themecreator.ui.screens.Mode
 import com.futo.themecreator.ui.screens.ThemeListScreen
 import com.futo.themecreator.ui.theme.ThemeCreatorTheme
 
@@ -37,7 +38,7 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("list/edit") {
                         ThemeListScreen(
-                            mode = ThemeListScreen.Mode.EDIT,
+                            mode = Mode.EDIT,
                             onBack = { nav.popBackStack() },
                             onSelect = { theme ->
                                 ThemeState.replace(theme)
@@ -49,7 +50,7 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("list/export") {
                         ThemeListScreen(
-                            mode = ThemeListScreen.Mode.EXPORT,
+                            mode = Mode.EXPORT,
                             onBack = { nav.popBackStack() },
                             onSelect = { theme ->
                                 ThemeState.replace(theme)
