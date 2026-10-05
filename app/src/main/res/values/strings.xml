@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FUTO Theme Creator</string>
+    <string name="tab_colors">الألوان</string>
+    <string name="tab_shapes">الأشكال</string>
+    <string name="tab_icons">الأيقونات</string>
+    <string name="tab_preview">المعاينة</string>
+    <string name="tab_export">التصدير</string>
+    <string name="save">حفظ</string>
+    <string name="export_zip">تصدير ZIP</string>
+    <string name="share">مشاركة</string>
+    <string name="load_image">تحميل صورة</string>
+    <string name="theme_name">اسم الثيم</string>
+    <string name="author">المؤلف</string>
+</resources>
