@@ -80,7 +80,7 @@ fun FontsSheet() {
 
         Button(
             onClick = {
-                importer.launch(arrayOf(
+                importerArabic.launch(arrayOf(
                     "font/ttf", "font/otf",
                     "application/x-font-ttf",
                     "application/x-font-otf",
@@ -91,7 +91,25 @@ fun FontsSheet() {
         ) {
             Icon(Icons.Default.FileOpen, null)
             Spacer(Modifier.width(8.dp))
-            Text("\ud83d\udcc2 \u0627\u0633\u062a\u064a\u0631\u0627\u062f \u0645\u0646 \u0627\u0644\u062c\u0647\u0627\u0632")
+            Text("\ud83d\udcc2 \u0627\u0633\u062a\u064a\u0631\u0627\u062f \u062e\u0637 \u0639\u0631\u0628\u064a")
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                importerEnglish.launch(arrayOf(
+                    "font/ttf", "font/otf",
+                    "application/x-font-ttf",
+                    "application/x-font-otf",
+                    "*/*"
+                ))
+            },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+        ) {
+            Icon(Icons.Default.FileOpen, null)
+            Spacer(Modifier.width(8.dp))
+            Text("\ud83d\udcc2 \u0627\u0633\u062a\u064a\u0631\u0627\u062f \u062e\u0637 \u0625\u0646\u062c\u0644\u064a\u0632\u064a")
         }
 
         Spacer(Modifier.height(8.dp))
