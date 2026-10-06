@@ -40,15 +40,31 @@ fun FontsSheet() {
     val version = ThemeState.fontsVersion
     val selected = ThemeState.theme.fontName
 
-    val importer = rememberLauncherForActivityResult(
+    // launcher لاستيراد خط عربي
+    val importerArabic = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri: Uri? ->
         if (uri != null) {
             scope.launch {
-                val name = FontDownloader.importFromUri(context, uri)
-                if (name != null) {
+                val target = FontDownloader.fontFile(context, "imported_arabic.ttf")
+                if (FontDownloader.importFromUri(context, uri, target)) {
                     ThemeState.fontsVersion = ThemeState.fontsVersion + 1
-                    ThemeState.replace(ThemeState.theme.copy(fontName = name))
+                    ThemeState.replace(ThemeState.theme.copy(fontName = "imported_arabic.ttf"))
+                }
+            }
+        }
+    }
+
+    // launcher لاستيراد خط إنجليزي
+    val importerEnglish = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            scope.launch {
+                val target = FontDownloader.fontFile(context, "imported_english.ttf")
+                if (FontDownloader.importFromUri(context, uri, target)) {
+                    ThemeState.fontsVersion = ThemeState.fontsVersion + 1
+                    ThemeState.replace(ThemeState.theme.copy(fontName = "imported_english.ttf"))
                 }
             }
         }
@@ -94,21 +110,7 @@ fun FontsSheet() {
             Text("\ud83c\udf10 \u062c\u0644\u0628 \u0627\u0644\u0645\u0632\u064a\u062f \u0645\u0646 \u0627\u0644\u062e\u0637\u0648\u0637")
         }
 
-        Spacer(Modifier.height(8.dp))
 
-        OutlinedButton(
-            onClick = {
-                scope.launch {
-                    try {
-                        FontCatalog.fetchAll()
-                        ThemeState.fontsVersion = ThemeState.fontsVersion + 1
-                    } catch (e: Exception) { e.printStackTrace() }
-                }
-            },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-        ) {
-            Text("🌐 جلب المزيد من الخطوط")
-        }
 
         Spacer(Modifier.height(12.dp))
 

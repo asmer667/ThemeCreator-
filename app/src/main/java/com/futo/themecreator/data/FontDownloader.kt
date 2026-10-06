@@ -147,4 +147,31 @@ object FontDownloader {
                 null
             }
         }
+
+    /**
+     * نسخة جديدة: تستورد خطًا إلى ملف محدد (target).
+     * تُستخدم من شاشة الخطوط لتحديد اللغة (عربي/إنجليزي) مسبقًا.
+     */
+    suspend fun importFromUri(
+        context: Context,
+        uri: Uri,
+        target: File,
+    ): Boolean = withContext(Dispatchers.IO) {
+        try {
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                target.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            if (target.exists() && target.length() > 1000) {
+                true
+            } else {
+                target.delete()
+                false
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
 }
